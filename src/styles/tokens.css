@@ -1,0 +1,110 @@
+@theme {
+  /* Brand colors */
+  --color-primary-light: #f3efec;
+  --color-primary-light-hover: #ede6e2;
+  --color-primary-light-active: #dbccc3;
+  --color-primary: #8a5a3c;
+  --color-primary-hover: #7c5136;
+  --color-primary-active: #6e4830;
+  --color-primary-dark: #68442d;
+  --color-primary-dark-hover: #533624;
+  --color-primary-dark-active: #3e281b;
+  --color-primary-darker: #301f15;
+
+  --color-secondary-light: #f9f6f0;
+  --color-secondary-light-hover: #f6f2e9;
+  --color-secondary-light-active: #ede3d1;
+  --color-secondary: #c5a56a;
+  --color-secondary-hover: #b1955f;
+  --color-secondary-active: #9e8455;
+  --color-secondary-dark: #947c50;
+  --color-secondary-dark-hover: #766340;
+  --color-secondary-dark-active: #594a30;
+  --color-secondary-darker: #453a25;
+
+  --color-background: #f9f6f0;
+
+  /* Semantic colors */
+  --color-pink-background: #ffeaec;
+  --color-checklist-pink: #e8b4b8;
+  --color-checklist-gray: #b7b7b7;
+  --color-repairable: #ddedd1;
+  --color-open: #d1edec;
+  --color-reservable: #ffe0bc;
+
+  /* 임시 중립 색상: Figma의 정확한 값이 확인되면 교체합니다. */
+  --color-surface: #fffdf9;
+  --color-foreground: #432c20;
+  --color-border: #dfcbbb;
+  --color-muted: #d9cbc2;
+  --color-error: #c2413b;
+
+  /* Typography */
+  --font-sans:
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', sans-serif;
+
+  --text-main: 48px;
+  --text-main--line-height: 1;
+  --text-main--letter-spacing: -0.02em;
+  --text-main--font-weight: 700;
+
+  --text-display: 32px;
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.02em;
+  --text-display--font-weight: 700;
+
+  --text-h1: 28px;
+  --text-h1--line-height: 1;
+  --text-h1--letter-spacing: -0.01em;
+  --text-h1--font-weight: 600;
+
+  --text-h2: 20px;
+  --text-h2--line-height: 1;
+  --text-h2--letter-spacing: -0.01em;
+  --text-h2--font-weight: 600;
+
+  --text-h3: 18px;
+  --text-h3--line-height: 1;
+  --text-h3--letter-spacing: -0.01em;
+  --text-h3--font-weight: 600;
+
+  --text-label: 13px;
+  --text-label--line-height: 1;
+  --text-label--letter-spacing: 0;
+  --text-label--font-weight: 500;
+
+  --text-body-1: 16px;
+  --text-body-1--line-height: 1;
+  --text-body-1--letter-spacing: 0;
+  --text-body-1--font-weight: 400;
+
+  --text-body-2: 14px;
+  --text-body-2--line-height: 1;
+  --text-body-2--letter-spacing: 0;
+  --text-body-2--font-weight: 400;
+
+  --text-caption: 12px;
+  --text-caption--line-height: 1;
+  --text-caption--letter-spacing: 0;
+  --text-caption--font-weight: 400;
+
+  --text-button: 16px;
+  --text-button--line-height: 1;
+  --text-button--letter-spacing: -0.01em;
+  --text-button--font-weight: 600;
+
+  --text-tab: 10px;
+  --text-tab--line-height: 1;
+  --text-tab--letter-spacing: 0;
+  --text-tab--font-weight: 500;
+
+  /* Shape and elevation */
+  --radius-card: 20px;
+  --shadow-card: 0 4px 12px rgb(67 44 32 / 12%);
+}
+
+:root {
+  --page-padding: 16px;
+  --bottom-navigation-height: 72px;
+}

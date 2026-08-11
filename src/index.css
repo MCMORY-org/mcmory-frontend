@@ -1,0 +1,4 @@
+@import 'pretendard/dist/web/variable/pretendardvariable.css';
+@import 'tailwindcss';
+@import './styles/tokens.css';
+@import './styles/global.css';
