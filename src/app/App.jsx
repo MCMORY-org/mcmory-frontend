@@ -1,8 +1,15 @@
+import { Navigate, Route, Routes } from 'react-router-dom'
+
+import LoadingPage from '@/pages/LoadingPage.jsx'
+import MainPage from '@/pages/MainPage.jsx'
+
 function App() {
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-background text-foreground">
-      <h1 className="text-main">MCMORY</h1>
-    </main>
+    <Routes>
+      <Route path="/" element={<Navigate to="/main" replace />} />
+      <Route path="/main" element={<MainPage />} />
+      <Route path="/loading" element={<LoadingPage />} />
+    </Routes>
   )
 }
 
