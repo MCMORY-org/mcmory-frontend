@@ -1,18 +1,15 @@
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 
 import ComponentTestPage from '@/pages/ComponentTestPage.jsx'
+import LoadingPage from '@/pages/LoadingPage.jsx'
+import MainPage from '@/pages/MainPage.jsx'
 
 function App() {
   return (
     <Routes>
-      <Route
-        path="/"
-        element={
-          <main className="flex min-h-dvh items-center justify-center bg-background">
-            <h1 className="text-main text-primary-dark-hover">MCMORY</h1>
-          </main>
-        }
-      />
+      <Route path="/" element={<Navigate to="/main" replace />} />
+      <Route path="/main" element={<MainPage />} />
+      <Route path="/loading" element={<LoadingPage />} />
       <Route path="/test" element={<ComponentTestPage />} />
     </Routes>
   )
