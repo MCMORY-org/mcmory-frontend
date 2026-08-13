@@ -7,7 +7,7 @@ function PasswordInput({ className = '', disabled = false, ...inputProps }) {
   const [isVisible, setIsVisible] = useState(false)
 
   return (
-    <div className="relative h-[38px] w-[280px]">
+    <div className="relative h-[45px] w-[320px]">
       <input
         type={isVisible ? 'text' : 'password'}
         disabled={disabled}
