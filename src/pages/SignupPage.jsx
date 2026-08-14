@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
+import { signup } from '@/api/auth.jsx'
 import mcmLogo from '@/assets/icons/main/MCM.svg'
 import checkIcon from '@/assets/icons/sign-up/Check.svg?raw'
 import listIcon from '@/assets/icons/sign-up/List.svg'
@@ -18,13 +20,18 @@ function BrandDivider() {
   )
 }
 
-const GENDER_OPTIONS = ['Male', 'Female', 'None']
+const GENDER_OPTIONS = [
+  { label: 'Male', value: 'MALE' },
+  { label: 'Female', value: 'FEMALE' },
+  { label: 'None', value: 'NONE' },
+]
 
 function GenderSelect({ onChange, value }) {
   const [isOpen, setIsOpen] = useState(false)
+  const selectedLabel = GENDER_OPTIONS.find((option) => option.value === value)?.label ?? ''
 
   const handleSelect = (option) => {
-    onChange(option)
+    onChange(option.value)
     setIsOpen(false)
   }
 
@@ -36,18 +43,14 @@ function GenderSelect({ onChange, value }) {
         aria-expanded={isOpen}
         aria-label="성별 선택"
         onClick={() => setIsOpen((current) => !current)}
-        className={`flex h-[45px] w-[320px] items-center justify-between border border-primary bg-background px-[12px] ${
-          isOpen ? 'rounded-t-[10px]' : 'rounded-[10px]'
-        }`}
+        className={`flex h-[45px] w-[320px] items-center justify-between border border-primary bg-background px-[12px] ${isOpen ? 'rounded-t-[10px]' : 'rounded-[10px]'}`}
       >
-        <span className="text-label text-primary">{value}</span>
+        <span className="text-label text-primary">{selectedLabel}</span>
         <img
           src={listIcon}
           alt=""
           aria-hidden="true"
-          className={`ml-auto h-[10px] w-5 shrink-0 transition-transform ${
-            isOpen ? 'rotate-180' : ''
-          }`}
+          className={`ml-auto h-[10px] w-5 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -59,18 +62,14 @@ function GenderSelect({ onChange, value }) {
         >
           {GENDER_OPTIONS.map((option, index) => (
             <button
-              key={option}
+              key={option.value}
               type="button"
               role="option"
-              aria-selected={value === option}
+              aria-selected={value === option.value}
               onClick={() => handleSelect(option)}
-              className={`flex h-[45px] w-full items-center px-[12px] text-left text-label text-primary ${
-                index < GENDER_OPTIONS.length - 1
-                  ? 'border-b border-primary-light-active'
-                  : ''
-              }`}
+              className={`flex h-[45px] w-full items-center px-[12px] text-left text-label text-primary ${index < GENDER_OPTIONS.length - 1 ? 'border-b border-primary-light-active' : ''}`}
             >
-              {option}
+              {option.label}
             </button>
           ))}
         </div>
@@ -79,77 +78,132 @@ function GenderSelect({ onChange, value }) {
   )
 }
 
+function AgreementField({ checked, label, onChange }) {
+  return (
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className="flex h-[45px] w-[320px] items-center justify-between rounded-[10px] border border-primary bg-background px-[12px] text-left"
+    >
+      <span className="text-label text-primary">{label}</span>
+      <span
+        aria-hidden="true"
+        className={`block h-5 w-[19px] shrink-0 [&_svg]:h-5 [&_svg]:w-[19px] ${checked ? 'text-primary' : 'text-[#E2D6CE]'}`}
+        dangerouslySetInnerHTML={{ __html: checkIcon }}
+      />
+    </button>
+  )
+}
+
 function SignupDetails({
   birth,
   gender,
   isSmsAccepted,
+  isPrivacyAgreed,
   onBirthChange,
   onGenderChange,
   onSmsChange,
+  onPrivacyChange,
 }) {
   return (
     <>
       <div>
-        <label
-          htmlFor="birth"
-          className="mb-[7px] block text-h3 text-primary-dark-active"
-        >
+        <label htmlFor="birth" className="mb-[7px] block text-h3 text-primary-dark-active">
           Birth
         </label>
         <DatePicker value={birth} onChange={onBirthChange} />
       </div>
 
       <div className="mt-[15px]">
-        <span className="mb-[7px] block text-h3 text-primary-dark-active">
-          Gender
-        </span>
+        <span className="mb-[7px] block text-h3 text-primary-dark-active">Gender</span>
         <GenderSelect value={gender} onChange={onGenderChange} />
       </div>
 
       <div className="mt-[15px]">
         <span className="mb-[7px] block text-h3 text-primary-dark-active">
-          Receive SMS (opt)
+          개인정보 수집 및 이용 동의 (필수)
         </span>
-        <button
-          type="button"
-          role="checkbox"
-          aria-checked={isSmsAccepted}
-          onClick={() => onSmsChange(!isSmsAccepted)}
-          className="flex h-[45px] w-[320px] items-center justify-between rounded-[10px] border border-primary bg-background pr-[12px] pl-[12px] text-left"
-        >
-          <span className="text-label text-primary">
-            Get present recommendation and events.
-          </span>
-          <span
-            aria-hidden="true"
-            className={`block h-5 w-[19px] shrink-0 [&_svg]:h-5 [&_svg]:w-[19px] ${
-              isSmsAccepted ? 'text-primary' : 'text-[#E2D6CE]'
-            }`}
-            dangerouslySetInnerHTML={{ __html: checkIcon }}
-          />
-        </button>
+        <AgreementField
+          checked={isPrivacyAgreed}
+          onChange={onPrivacyChange}
+          label={
+            <>
+              이름, 전화번호, 생년월일, 성별 정보를
+              <br />
+              회원가입 및 서비스 제공 목적으로 수집해요.
+            </>
+          }
+        />
+      </div>
+
+      <div className="mt-[15px]">
+        <span className="mb-[7px] block text-h3 text-primary-dark-active">
+          SMS 수신 동의 (선택)
+        </span>
+        <AgreementField
+          checked={isSmsAccepted}
+          onChange={onSmsChange}
+          label="선물 추천 및 이벤트 소식을 받아보세요."
+        />
       </div>
     </>
   )
 }
 
 function SignupPage() {
+  const navigate = useNavigate()
   const [step, setStep] = useState(1)
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [hasPasswordMismatch, setHasPasswordMismatch] = useState(false)
   const [birth, setBirth] = useState('')
   const [gender, setGender] = useState('')
   const [isSmsAccepted, setIsSmsAccepted] = useState(false)
+  const [isPrivacyAgreed, setIsPrivacyAgreed] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
+    setErrorMessage('')
 
     if (step === 1) {
       const isMismatch = password !== confirmPassword
       setHasPasswordMismatch(isMismatch)
-
       if (!isMismatch) setStep(2)
+      return
+    }
+
+    if (!birth || !gender) {
+      setErrorMessage('생년월일과 성별을 입력해주세요.')
+      return
+    }
+
+    if (!isPrivacyAgreed) {
+      setErrorMessage('개인정보 수집과 이용에 동의해주세요.')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await signup({
+        name,
+        phone,
+        password,
+        birthDate: birth,
+        gender,
+        privacyAgreed: isPrivacyAgreed,
+        smsOptIn: isSmsAccepted,
+      })
+      navigate('/login', { replace: true })
+    } catch (error) {
+      setErrorMessage(error.message ?? '회원가입 중 오류가 발생했습니다.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -157,10 +211,7 @@ function SignupPage() {
     <main className="mx-auto min-h-dvh w-full max-w-[412px] overflow-x-hidden bg-background px-4 pb-10">
       <div className="flex flex-col items-center pt-[50px]">
         <BrandDivider />
-
-        <h1 className="mt-[68px] text-display text-primary-dark-active">
-          Sign up
-        </h1>
+        <h1 className="mt-[68px] text-display text-primary-dark-active">Sign up</h1>
 
         <form
           onSubmit={handleSubmit}
@@ -169,30 +220,22 @@ function SignupPage() {
           {step === 1 ? (
             <>
               <div>
-                <label htmlFor="name" className="mb-[7px] block text-h3 text-primary-dark-active">
-                  Name
-                </label>
-                <TextInput id="name" name="name" autoComplete="name" required />
+                <label htmlFor="name" className="mb-[7px] block text-h3 text-primary-dark-active">Name</label>
+                <TextInput id="name" name="name" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} required />
               </div>
 
               <div className="mt-[15px]">
-                <label htmlFor="signup-phone-number" className="mb-[7px] block text-h3 text-primary-dark-active">
-                  Phone Number
-                </label>
-                <TextInput id="signup-phone-number" name="phoneNumber" type="tel" autoComplete="tel" required />
+                <label htmlFor="signup-phone-number" className="mb-[7px] block text-h3 text-primary-dark-active">Phone Number</label>
+                <TextInput id="signup-phone-number" name="phoneNumber" type="tel" inputMode="numeric" autoComplete="tel" value={phone} onChange={(event) => setPhone(event.target.value)} required />
               </div>
 
               <div className="mt-[15px]">
-                <label htmlFor="signup-password" className="mb-[7px] block text-h3 text-primary-dark-active">
-                  Password
-                </label>
+                <label htmlFor="signup-password" className="mb-[7px] block text-h3 text-primary-dark-active">Password</label>
                 <PasswordInput id="signup-password" name="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="new-password" required />
               </div>
 
               <div className="mt-[15px]">
-                <label htmlFor="confirm-password" className="mb-[7px] block text-h3 text-primary-dark-active">
-                  Confirm Password
-                </label>
+                <label htmlFor="confirm-password" className="mb-[7px] block text-h3 text-primary-dark-active">Confirm Password</label>
                 <PasswordInput
                   id="confirm-password"
                   name="confirmPassword"
@@ -206,7 +249,7 @@ function SignupPage() {
                 />
                 {hasPasswordMismatch && (
                   <p id="confirm-password-error" className="mt-[7px] text-caption text-required-text">
-                    일치하지 않습니다.
+                    비밀번호가 일치하지 않습니다.
                   </p>
                 )}
               </div>
@@ -221,12 +264,19 @@ function SignupPage() {
                 birth={birth}
                 gender={gender}
                 isSmsAccepted={isSmsAccepted}
+                isPrivacyAgreed={isPrivacyAgreed}
                 onBirthChange={setBirth}
                 onGenderChange={setGender}
                 onSmsChange={setIsSmsAccepted}
+                onPrivacyChange={setIsPrivacyAgreed}
               />
-              <LoginButton type="submit" size="compact" className="mt-auto">
-                Sign up
+              {errorMessage && (
+                <p role="alert" className="mt-3 w-[320px] text-caption text-required-text">
+                  {errorMessage}
+                </p>
+              )}
+              <LoginButton type="submit" size="compact" disabled={isSubmitting} className="mt-auto">
+                {isSubmitting ? 'Signing up...' : 'Sign up'}
               </LoginButton>
             </>
           )}
