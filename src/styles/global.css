@@ -37,7 +37,6 @@ select {
 }
 
 button {
-  padding: 0;
   cursor: pointer;
 }
 
@@ -57,7 +56,3 @@ svg {
   max-width: 100%;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
