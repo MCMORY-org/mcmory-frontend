@@ -1,13 +1,16 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 
-import LoadingPage from '@/pages/LoadingPage.jsx'
-import MainPage from '@/pages/MainPage.jsx'
+import ComponentTestPage from '@/pages/ComponentTestPage.jsx'
 import GiftPage from '@/pages/GiftPage.jsx'
-import MemoryPage from '@/pages/MemoryPage.jsx'
 import InviteSentPage from '@/pages/InviteSentPage.jsx'
+import LoadingPage from '@/pages/LoadingPage.jsx'
+import LoginPage from '@/pages/LoginPage.jsx'
+import MainPage from '@/pages/MainPage.jsx'
+import MemoryPage from '@/pages/MemoryPage.jsx'
 import PeoplePage from '@/pages/PeoplePage.jsx'
 import RecommendPage from '@/pages/RecommendPage.jsx'
 import RecommendQuestionsPage from '@/pages/RecommendQuestionsPage.jsx'
+import SignupPage from '@/pages/SignupPage.jsx'
 
 function App() {
   return (
@@ -15,6 +18,9 @@ function App() {
       <Route path="/" element={<Navigate to="/main" replace />} />
       <Route path="/main" element={<MainPage />} />
       <Route path="/loading" element={<LoadingPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
+      <Route path="/test" element={<ComponentTestPage />} />
       <Route path="/recommend" element={<RecommendPage />} />
       <Route path="/recommend/questions" element={<RecommendQuestionsPage />} />
       <Route path="/recommend/list" element={<Navigate to="/gift" replace />} />

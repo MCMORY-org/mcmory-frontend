@@ -31,6 +31,7 @@
   --color-repairable: #ddedd1;
   --color-open: #d1edec;
   --color-reservable: #ffe0bc;
+  --color-required-text: #9e2a2b;
 
   /* 임시 중립 색상: Figma의 정확한 값이 확인되면 교체합니다. */
   --color-surface: #fffdf9;
