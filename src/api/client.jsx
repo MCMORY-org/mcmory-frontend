@@ -69,3 +69,7 @@ export async function apiRequest(path, options = {}) {
 
   return data.result
 }
+
+export function isUnauthorized(error) {
+  return error instanceof ApiError && error.code === 'AUTH401_1'
+}

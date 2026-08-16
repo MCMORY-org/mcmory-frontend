@@ -1,74 +1,97 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { isUnauthorized } from '@/api/client.jsx'
+import { deleteOwned, listOwned, mapOwnedProduct, registerOwned } from '@/api/owned.jsx'
 import trashIcon from '@/assets/icons/common-components/Trash.svg'
 import BottomTab from '@/components/layout/BottomTab'
-
-export const INITIAL_PRODUCTS = [
-  {
-    id: 'tracy-crossbody',
-    name: 'Tracy 비세토스 크로스바디',
-    addedAt: '2026 . 08 . 06',
-    serial: 'MX2024A031',
-  },
-  {
-    id: 'visetos-shoulder',
-    name: '비세토스 숄더백',
-    addedAt: '2026 . 08 . 06',
-    serial: 'MX2024B102',
-  },
-]
-
-const SERIAL_PRODUCTS = {
-  MX2024A031: 'Tracy 비세토스 크로스바디',
-  MX2024B102: '비세토스 숄더백',
-  MX2024C203: '비세토스 오리지널 카드 반지갑',
-}
-
-function formatAddedDate(date = new Date()) {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year} . ${month} . ${day}`
-}
 
 function OwnedPage() {
   const navigate = useNavigate()
   const [serialNumber, setSerialNumber] = useState('')
-  const [products, setProducts] = useState(INITIAL_PRODUCTS)
+  const [products, setProducts] = useState([])
   const [productToDelete, setProductToDelete] = useState(null)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
-  const handleRegister = (event) => {
-    event.preventDefault()
-    const serial = serialNumber.trim().toUpperCase()
-    if (!serial) return
-
-    const alreadyOwned = products.some(
-      (product) => product.serial.toUpperCase() === serial,
-    )
-    if (alreadyOwned) {
-      setSerialNumber('')
-      return
-    }
-
-    setProducts((current) => [
-      {
-        id: serial,
-        name: SERIAL_PRODUCTS[serial] ?? serial,
-        addedAt: formatAddedDate(),
-        serial,
-      },
-      ...current,
-    ])
-    setSerialNumber('')
+  const loadProducts = async () => {
+    const result = await listOwned()
+    setProducts((result?.list ?? []).map(mapOwnedProduct))
   }
 
-  const handleConfirmDelete = () => {
-    if (!productToDelete) return
-    setProducts((current) =>
-      current.filter((item) => item.id !== productToDelete.id),
-    )
-    setProductToDelete(null)
+  useEffect(() => {
+    let cancelled = false
+
+    async function load() {
+      setErrorMessage('')
+      setIsLoading(true)
+      try {
+        const result = await listOwned()
+        if (cancelled) return
+        setProducts((result?.list ?? []).map(mapOwnedProduct))
+      } catch (error) {
+        if (cancelled) return
+        if (isUnauthorized(error)) {
+          navigate('/login', { replace: true })
+          return
+        }
+        setErrorMessage(error.message ?? '보유 제품을 불러오지 못했습니다.')
+      } finally {
+        if (!cancelled) setIsLoading(false)
+      }
+    }
+
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [navigate])
+
+  const handleRegister = async (event) => {
+    event.preventDefault()
+    const serial = serialNumber.trim()
+    if (!serial || isSubmitting) return
+
+    setErrorMessage('')
+    setIsSubmitting(true)
+    try {
+      await registerOwned(serial)
+      setSerialNumber('')
+      await loadProducts()
+    } catch (error) {
+      if (isUnauthorized(error)) {
+        navigate('/login', { replace: true })
+        return
+      }
+      setErrorMessage(error.message ?? '제품 등록에 실패했습니다.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!productToDelete || isDeleting) return
+
+    setIsDeleting(true)
+    setErrorMessage('')
+    try {
+      await deleteOwned(productToDelete.id)
+      setProducts((current) =>
+        current.filter((item) => item.id !== productToDelete.id),
+      )
+      setProductToDelete(null)
+    } catch (error) {
+      if (isUnauthorized(error)) {
+        navigate('/login', { replace: true })
+        return
+      }
+      setErrorMessage(error.message ?? '제품 삭제에 실패했습니다.')
+      setProductToDelete(null)
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   return (
@@ -106,12 +129,17 @@ function OwnedPage() {
               placeholder="직접 입력하기 (예: MX2024A031)"
               className="w-full border-0 border-b-[0.5px] border-secondary-dark bg-transparent pb-2 text-[13px] font-medium text-primary-dark-active outline-none placeholder:text-primary-light-active"
             />
+            {errorMessage ? (
+              <p role="alert" className="text-[12px] font-medium text-[#9E2A2B]">
+                {errorMessage}
+              </p>
+            ) : null}
             <button
               type="submit"
-              disabled={!serialNumber.trim()}
+              disabled={!serialNumber.trim() || isSubmitting}
               className="flex w-full items-center justify-center rounded-[10px] bg-primary px-5 py-2.5 text-button text-background disabled:opacity-40"
             >
-              REGISTER
+              {isSubmitting ? 'REGISTERING...' : 'REGISTER'}
             </button>
           </form>
 
@@ -119,19 +147,29 @@ function OwnedPage() {
             MY MCM LIST
           </h2>
 
-          <ul className="mt-7 flex flex-col gap-7">
-            {products.map((product) => (
-              <li key={product.id}>
-                <OwnedProductCard
-                  product={product}
-                  onSelect={() =>
-                    navigate(`/owned/${product.id}`, { state: { product } })
-                  }
-                  onDelete={() => setProductToDelete(product)}
-                />
-              </li>
-            ))}
-          </ul>
+          {isLoading ? (
+            <p className="mt-7 text-center text-[13px] font-medium text-[#947C50]">
+              불러오는 중...
+            </p>
+          ) : products.length === 0 ? (
+            <p className="mt-7 text-center text-[13px] font-medium text-[#947C50]">
+              아직 등록한 제품이 없어요
+            </p>
+          ) : (
+            <ul className="mt-7 flex flex-col gap-7">
+              {products.map((product) => (
+                <li key={product.id}>
+                  <OwnedProductCard
+                    product={product}
+                    onSelect={() =>
+                      navigate(`/owned/${product.id}`, { state: { product } })
+                    }
+                    onDelete={() => setProductToDelete(product)}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 
@@ -140,8 +178,11 @@ function OwnedPage() {
       {productToDelete ? (
         <DeleteConfirmDialog
           productName={productToDelete.name}
+          isDeleting={isDeleting}
           onConfirm={handleConfirmDelete}
-          onCancel={() => setProductToDelete(null)}
+          onCancel={() => {
+            if (!isDeleting) setProductToDelete(null)
+          }}
         />
       ) : null}
     </main>
@@ -158,7 +199,15 @@ function OwnedProductCard({ product, onSelect, onDelete }) {
           className="flex w-full items-center bg-transparent text-left"
         >
           <div className="relative h-[104px] min-w-0 flex-1">
-            <span className="absolute top-0 left-0 h-[104px] w-[100px] rounded-[10px] bg-secondary-light-active shadow-[2px_2px_4px_rgba(110,72,48,0.25)]" />
+            {product.imageUrl ? (
+              <img
+                src={product.imageUrl}
+                alt=""
+                className="absolute top-0 left-0 h-[104px] w-[100px] rounded-[10px] object-cover shadow-[2px_2px_4px_rgba(110,72,48,0.25)]"
+              />
+            ) : (
+              <span className="absolute top-0 left-0 h-[104px] w-[100px] rounded-[10px] bg-secondary-light-active shadow-[2px_2px_4px_rgba(110,72,48,0.25)]" />
+            )}
             <div className="absolute top-1 right-0 left-[119px] flex h-[97px] flex-col items-start gap-[19px]">
               <div className="flex w-full flex-col items-start">
                 <p className="text-[13px] font-medium text-[#947C50]">NAME</p>
@@ -204,7 +253,7 @@ function OwnedProductCard({ product, onSelect, onDelete }) {
   )
 }
 
-function DeleteConfirmDialog({ productName, onConfirm, onCancel }) {
+function DeleteConfirmDialog({ productName, isDeleting, onConfirm, onCancel }) {
   return (
     <div
       className="absolute inset-0 z-20 flex items-center justify-center bg-[rgba(69,58,37,0.25)] px-[30px]"
@@ -229,15 +278,17 @@ function DeleteConfirmDialog({ productName, onConfirm, onCancel }) {
         <div className="mt-[11px] flex items-center gap-[9px]">
           <button
             type="button"
+            disabled={isDeleting}
             onClick={onConfirm}
-            className="flex h-[22px] w-[33px] items-center justify-center rounded-[5px] bg-[#9E2A2B] px-2.5 text-[13px] font-medium text-[#F9F6F0]"
+            className="flex h-[22px] w-[33px] items-center justify-center rounded-[5px] bg-[#9E2A2B] px-2.5 text-[13px] font-medium text-[#F9F6F0] disabled:opacity-40"
           >
             예
           </button>
           <button
             type="button"
+            disabled={isDeleting}
             onClick={onCancel}
-            className="flex h-[22px] w-[59px] items-center justify-center rounded-[5px] bg-white px-2.5 text-[13px] font-medium text-[#3E281B] outline outline-[0.5px] -outline-offset-[0.5px] outline-[#C5A56A]"
+            className="flex h-[22px] w-[59px] items-center justify-center rounded-[5px] bg-white px-2.5 text-[13px] font-medium text-[#3E281B] outline outline-[0.5px] -outline-offset-[0.5px] outline-[#C5A56A] disabled:opacity-40"
           >
             아니요
           </button>
