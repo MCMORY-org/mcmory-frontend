@@ -3,6 +3,8 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import LoadingPage from '@/pages/LoadingPage.jsx'
 import MainPage from '@/pages/MainPage.jsx'
 import GiftPage from '@/pages/GiftPage.jsx'
+import MemoryPage from '@/pages/MemoryPage.jsx'
+import InviteSentPage from '@/pages/InviteSentPage.jsx'
 import PeoplePage from '@/pages/PeoplePage.jsx'
 import RecommendPage from '@/pages/RecommendPage.jsx'
 import RecommendQuestionsPage from '@/pages/RecommendQuestionsPage.jsx'
@@ -17,6 +19,8 @@ function App() {
       <Route path="/recommend/questions" element={<RecommendQuestionsPage />} />
       <Route path="/recommend/list" element={<Navigate to="/gift" replace />} />
       <Route path="/gift" element={<GiftPage />} />
+      <Route path="/memory" element={<MemoryPage />} />
+      <Route path="/memory/sent" element={<InviteSentPage />} />
       <Route path="/recommend/people" element={<PeoplePage />} />
     </Routes>
   )

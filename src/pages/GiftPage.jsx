@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import BottomTab from '@/components/layout/BottomTab'
 
@@ -26,11 +26,22 @@ const PRODUCTS = [
 
 function GiftPage() {
   const navigate = useNavigate()
-  const [selectedId, setSelectedId] = useState('')
+  const location = useLocation()
+  const [selectedId, setSelectedId] = useState(
+    () => location.state?.selectedGiftId ?? '',
+  )
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    navigate('/recommend/people')
+    const gift = PRODUCTS.find((product) => product.id === selectedId)
+    if (!gift) return
+
+    navigate('/memory', {
+      state: {
+        recipientName: location.state?.recipientName,
+        gift,
+      },
+    })
   }
 
   return (
@@ -96,7 +107,8 @@ function GiftPage() {
         <div className="shrink-0 px-4 pb-3">
           <button
             type="submit"
-            className="flex w-full items-center justify-center rounded-[10px] bg-primary px-5 py-2.5 text-button text-background"
+            disabled={!selectedId}
+            className="flex w-full items-center justify-center rounded-[10px] bg-primary px-5 py-2.5 text-button text-background disabled:opacity-40"
           >
             SAVE STYLE
           </button>
