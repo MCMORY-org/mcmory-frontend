@@ -68,19 +68,33 @@ body::-webkit-scrollbar,
 .store-map .leaflet-container {
   height: 100%;
   width: 100%;
-  background: #ede3d1;
+  background: #e6e4e0;
   font-family: inherit;
 }
 
-.store-map .leaflet-tile-pane {
-  filter: saturate(0.88) sepia(0.18) contrast(1.04);
+.store-map img {
+  max-width: none;
+}
+
+.store-map .leaflet-control-zoom {
+  border: 0;
+  margin: 8px 8px 0 0;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
+}
+
+.store-map .leaflet-control-zoom a {
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  color: #3e281b;
+  background: #f9f6f0;
 }
 
 .store-map .leaflet-control-attribution {
   margin: 0;
   padding: 2px 6px;
-  background: rgb(249 246 240 / 82%);
-  color: #947c50;
+  background: rgb(255 255 255 / 80%);
+  color: #555;
   font-size: 9px;
   line-height: 1.2;
 }
@@ -94,7 +108,7 @@ body::-webkit-scrollbar,
   position: relative;
   width: 28px;
   height: 36px;
-  filter: drop-shadow(0 2px 3px rgb(62 40 27 / 35%));
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 30%));
 }
 
 .store-map-pin-inner span {
@@ -102,7 +116,7 @@ body::-webkit-scrollbar,
   top: 6px;
   right: 0;
   left: 0;
-  color: #f9f6f0;
+  color: #fff;
   font-size: 12px;
   font-weight: 600;
   line-height: 1;

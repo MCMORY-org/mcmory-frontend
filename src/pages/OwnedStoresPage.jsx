@@ -177,28 +177,25 @@ function StoreMap({ stores }) {
     if (!containerRef.current || mapRef.current) return undefined
 
     const map = L.map(containerRef.current, {
-      scrollWheelZoom: false,
+      scrollWheelZoom: true,
       zoomControl: false,
       attributionControl: false,
-      zoomSnap: 0.5,
-      zoomDelta: 0.5,
     }).setView(getMapCenter([]), 13)
 
-    L.tileLayer(
-      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-      {
-        attribution: '&copy; OpenStreetMap &copy; CARTO',
-        subdomains: 'abcd',
-        maxZoom: 20,
-      },
-    ).addTo(map)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap',
+      maxZoom: 19,
+    }).addTo(map)
+    L.control.zoom({ position: 'topright' }).addTo(map)
     L.control.attribution({ prefix: false, position: 'bottomright' }).addTo(map)
 
     mapRef.current = map
     const frameId = window.requestAnimationFrame(() => map.invalidateSize())
+    const timeoutId = window.setTimeout(() => map.invalidateSize(), 150)
 
     return () => {
       window.cancelAnimationFrame(frameId)
+      window.clearTimeout(timeoutId)
       map.remove()
       mapRef.current = null
     }
@@ -248,7 +245,7 @@ function StoreMap({ stores }) {
   }, [stores])
 
   return (
-    <div className="store-map relative h-[186px] w-full overflow-hidden rounded-[10px] bg-secondary-light-active">
+    <div className="store-map relative h-[260px] w-full overflow-hidden rounded-[10px] bg-[#e6e4e0]">
       <div ref={containerRef} className="h-full w-full" />
     </div>
   )
