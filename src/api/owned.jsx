@@ -1,4 +1,11 @@
-import { apiRequest } from '@/api/client.jsx'
+import { apiRequest, withFallback } from '@/api/client.jsx'
+import {
+  addFallbackOwned,
+  getFallbackCareGuide,
+  getFallbackOwned,
+  getFallbackStyling,
+  removeFallbackOwned,
+} from '@/api/dummyData.js'
 
 export function formatOwnedDate(value) {
   if (!value) return ''
@@ -20,28 +27,46 @@ export function mapOwnedProduct(item) {
 }
 
 export function listOwned() {
-  return apiRequest('/api/v1/owned')
+  return withFallback('GET /api/v1/owned', () => apiRequest('/api/v1/owned'), getFallbackOwned)
 }
 
 export function registerOwned(serial) {
-  return apiRequest('/api/v1/owned', {
-    method: 'POST',
-    body: JSON.stringify({ serial }),
-  })
+  return withFallback(
+    'POST /api/v1/owned',
+    () =>
+      apiRequest('/api/v1/owned', {
+        method: 'POST',
+        body: JSON.stringify({ serial }),
+      }),
+    () => addFallbackOwned(serial),
+  )
 }
 
 export function deleteOwned(id) {
-  return apiRequest('/api/v1/owned', {
-    method: 'DELETE',
-    body: JSON.stringify({ id }),
-  })
+  return withFallback(
+    'DELETE /api/v1/owned',
+    () =>
+      apiRequest('/api/v1/owned', {
+        method: 'DELETE',
+        body: JSON.stringify({ id }),
+      }),
+    () => removeFallbackOwned(id),
+  )
 }
 
 export function getOwnedStyling(id, { aiReason = false } = {}) {
   const query = aiReason ? '?aiReason=true' : ''
-  return apiRequest(`/api/v1/owned/${id}/styling${query}`)
+  return withFallback(
+    `GET /api/v1/owned/${id}/styling`,
+    () => apiRequest(`/api/v1/owned/${id}/styling${query}`),
+    getFallbackStyling,
+  )
 }
 
 export function getOwnedCareGuide(id) {
-  return apiRequest(`/api/v1/owned/${id}/care-guide`)
+  return withFallback(
+    `GET /api/v1/owned/${id}/care-guide`,
+    () => apiRequest(`/api/v1/owned/${id}/care-guide`),
+    getFallbackCareGuide,
+  )
 }

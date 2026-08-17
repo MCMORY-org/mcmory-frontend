@@ -1,4 +1,5 @@
-import { apiRequest } from '@/api/client.jsx'
+import { apiRequest, withFallback } from '@/api/client.jsx'
+import { getFallbackStores } from '@/api/dummyData.js'
 
 export function getStores({ repair = false, openNow = false, reservable = false } = {}) {
   const params = new URLSearchParams()
@@ -7,5 +8,9 @@ export function getStores({ repair = false, openNow = false, reservable = false 
   if (reservable) params.set('reservable', '1')
 
   const query = params.toString()
-  return apiRequest(`/api/v1/stores${query ? `?${query}` : ''}`)
+  return withFallback(
+    'GET /api/v1/stores',
+    () => apiRequest(`/api/v1/stores${query ? `?${query}` : ''}`),
+    () => getFallbackStores({ repair, openNow, reservable }),
+  )
 }

@@ -1,7 +1,8 @@
-import { apiRequest } from '@/api/client.jsx'
+import { apiRequest, withFallback } from '@/api/client.jsx'
+import { getFallbackLetters } from '@/api/dummyData.js'
 
 export function getLetters() {
-  return apiRequest('/api/v1/letters')
+  return withFallback('GET /api/v1/letters', () => apiRequest('/api/v1/letters'), getFallbackLetters)
 }
 
 export function mapReceivedMemory(item) {
