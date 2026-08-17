@@ -1,9 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
+import L from 'leaflet'
 
 import BottomTab from '@/components/layout/BottomTab'
 
 import { INITIAL_PRODUCTS } from './OwnedPage.jsx'
+
+const SEOUL_CENTER = [37.517, 127.028]
 
 const FILTERS = [
   { id: 'repairable', label: '이 제품 수리 가능' },
@@ -19,7 +22,8 @@ const STORES = [
     repairable: true,
     open: true,
     reservable: true,
-    pin: { left: 153, top: 34 },
+    latitude: 37.5269,
+    longitude: 127.0408,
   },
   {
     id: 2,
@@ -28,7 +32,8 @@ const STORES = [
     repairable: true,
     open: true,
     reservable: true,
-    pin: { left: 203, top: 62 },
+    latitude: 37.5284,
+    longitude: 127.0402,
   },
   {
     id: 3,
@@ -37,9 +42,26 @@ const STORES = [
     repairable: true,
     open: true,
     reservable: true,
-    pin: { left: 119, top: 95 },
+    latitude: 37.4919,
+    longitude: 127.0079,
   },
 ]
+
+function getStoreLatLng(store) {
+  if (Number.isFinite(store?.latitude) && Number.isFinite(store?.longitude)) {
+    return [store.latitude, store.longitude]
+  }
+  return null
+}
+
+function getMapCenter(stores = []) {
+  const points = stores.map(getStoreLatLng).filter(Boolean)
+  if (points.length === 0) return SEOUL_CENTER
+
+  const lat = points.reduce((sum, [value]) => sum + value, 0) / points.length
+  const lng = points.reduce((sum, [, value]) => sum + value, 0) / points.length
+  return [lat, lng]
+}
 
 function OwnedStoresPage() {
   const navigate = useNavigate()
@@ -97,16 +119,7 @@ function OwnedStoresPage() {
           </div>
 
           <div className="flex flex-col gap-5">
-            <div className="relative h-[186px] w-full overflow-hidden bg-secondary-light-active">
-              {visibleStores.map((store) => (
-                <MapPin
-                  key={store.id}
-                  number={store.id}
-                  left={store.pin.left}
-                  top={store.pin.top}
-                />
-              ))}
-            </div>
+            <StoreMap stores={visibleStores} />
 
             <div className="flex flex-wrap items-start gap-2.5">
               {FILTERS.map((filter) => {
@@ -155,21 +168,88 @@ function OwnedStoresPage() {
   )
 }
 
-function MapPin({ number, left, top }) {
+function StoreMap({ stores }) {
+  const containerRef = useRef(null)
+  const mapRef = useRef(null)
+  const markersRef = useRef([])
+
+  useEffect(() => {
+    if (!containerRef.current || mapRef.current) return undefined
+
+    const map = L.map(containerRef.current, {
+      scrollWheelZoom: false,
+      zoomControl: false,
+      attributionControl: false,
+      zoomSnap: 0.5,
+      zoomDelta: 0.5,
+    }).setView(getMapCenter([]), 13)
+
+    L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+      {
+        attribution: '&copy; OpenStreetMap &copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 20,
+      },
+    ).addTo(map)
+    L.control.attribution({ prefix: false, position: 'bottomright' }).addTo(map)
+
+    mapRef.current = map
+    const frameId = window.requestAnimationFrame(() => map.invalidateSize())
+
+    return () => {
+      window.cancelAnimationFrame(frameId)
+      map.remove()
+      mapRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    markersRef.current.forEach((marker) => marker.remove())
+    markersRef.current = []
+
+    const points = []
+    stores.forEach((store, index) => {
+      const latLng = getStoreLatLng(store)
+      if (!latLng) return
+      points.push(latLng)
+
+      const marker = L.marker(latLng, {
+        icon: L.divIcon({
+          className: 'store-map-pin',
+          iconSize: [28, 36],
+          iconAnchor: [14, 36],
+          html: `<div class="store-map-pin-inner">
+            <svg viewBox="0 0 28 36" width="28" height="36" aria-hidden="true">
+              <path d="M14 0C6.268 0 0 6.13 0 13.68C0 23.63 14 36 14 36S28 23.63 28 13.68C28 6.13 21.732 0 14 0Z" fill="#6E4830"></path>
+              <circle cx="14" cy="13.5" r="7.5" fill="#8A5A3C"></circle>
+            </svg>
+            <span>${index + 1}</span>
+          </div>`,
+        }),
+        title: store.name,
+      }).addTo(map)
+
+      markersRef.current.push(marker)
+    })
+
+    if (points.length === 1) {
+      map.setView(points[0], 15)
+    } else if (points.length > 1) {
+      map.fitBounds(points, { padding: [28, 28], maxZoom: 16 })
+    } else {
+      map.setView(getMapCenter([]), 13)
+    }
+
+    map.invalidateSize()
+  }, [stores])
+
   return (
-    <div
-      className="absolute flex h-[33px] w-[25px] items-start justify-center"
-      style={{ left, top }}
-    >
-      <svg viewBox="0 0 25 33" className="absolute inset-0" aria-hidden>
-        <path
-          d="M12.5 0C5.596 0 0 5.477 0 12.23C0 21.12 12.5 33 12.5 33S25 21.12 25 12.23C25 5.477 19.404 0 12.5 0Z"
-          fill="#6E4830"
-        />
-      </svg>
-      <span className="relative mt-1 text-[16px] font-semibold text-white">
-        {number}
-      </span>
+    <div className="store-map relative h-[186px] w-full overflow-hidden rounded-[10px] bg-secondary-light-active">
+      <div ref={containerRef} className="h-full w-full" />
     </div>
   )
 }
