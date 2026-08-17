@@ -147,9 +147,18 @@ export const DUMMY_STORES = [
 ]
 
 export const DUMMY_USER = {
-  name: '데모 사용자',
+  name: '아기호저들',
   phone: '',
 }
+
+export const DUMMY_FRIENDS = [
+  {
+    id: 1,
+    name: '친구 2',
+    phone: '01012345678',
+    tasteSummary: '',
+  },
+]
 
 function cloneOwnedList(list) {
   return list.map((item) => ({
@@ -236,4 +245,133 @@ export function getFallbackAuthResult(payload = {}) {
       phone: payload.phone ?? DUMMY_USER.phone,
     },
   }
+}
+
+export function getFallbackMe() {
+  return {
+    member: {
+      id: 1,
+      name: DUMMY_USER.name,
+    },
+  }
+}
+
+function cloneFriends(list) {
+  return list.map((item) => ({ ...item }))
+}
+
+function normalizePhoneDigits(phone) {
+  return String(phone ?? '').replace(/\D/g, '')
+}
+
+let fallbackFriends = cloneFriends(DUMMY_FRIENDS)
+
+export function getFallbackFriends() {
+  return { list: cloneFriends(fallbackFriends) }
+}
+
+export function addFallbackFriend({ name, phone }) {
+  const trimmedName = String(name ?? '').trim()
+  const digits = normalizePhoneDigits(phone)
+
+  if (!trimmedName || trimmedName.length > 20) {
+    throw new ApiError({
+      code: 'FRIEND400_1',
+      status: 400,
+      message: '이름은 1자에서 20자까지 입력해주세요',
+    })
+  }
+
+  if (!/^010\d{7,8}$/.test(digits)) {
+    throw new ApiError({
+      code: 'FRIEND400_2',
+      status: 400,
+      message: '전화번호 형식을 확인해주세요',
+    })
+  }
+
+  if (fallbackFriends.some((item) => item.phone === digits)) {
+    throw new ApiError({
+      code: 'FRIEND409_1',
+      status: 409,
+      message: '이미 등록한 친구의 전화번호입니다',
+    })
+  }
+
+  const nextId = Math.max(0, ...fallbackFriends.map((item) => Number(item.id) || 0)) + 1
+  const friend = {
+    id: nextId,
+    name: trimmedName,
+    phone: digits,
+    tasteSummary: '',
+  }
+
+  fallbackFriends = [...fallbackFriends, friend]
+  return { ok: true, friend: { ...friend } }
+}
+
+export function updateFallbackFriend(id, { name, phone }) {
+  const trimmedName = String(name ?? '').trim()
+  const digits = normalizePhoneDigits(phone)
+  const target = fallbackFriends.find((item) => item.id === id)
+
+  if (!target) {
+    throw new ApiError({
+      code: 'FRIEND404_1',
+      status: 404,
+      message: '친구 정보를 찾을 수 없습니다',
+    })
+  }
+
+  if (!trimmedName || trimmedName.length > 20) {
+    throw new ApiError({
+      code: 'FRIEND400_1',
+      status: 400,
+      message: '이름은 1자에서 20자까지 입력해주세요',
+    })
+  }
+
+  if (!digits) {
+    throw new ApiError({
+      code: 'FRIEND400_2',
+      status: 400,
+      message: '전화번호 형식을 확인해주세요',
+    })
+  }
+
+  if (target.phone !== digits) {
+    throw new ApiError({
+      code: 'FRIEND409_2',
+      status: 409,
+      message: '전화번호가 다른 친구는 새로 등록해주세요',
+    })
+  }
+
+  fallbackFriends = fallbackFriends.map((item) =>
+    item.id === id ? { ...item, name: trimmedName } : item,
+  )
+
+  return {
+    ok: true,
+    friend: {
+      id,
+      name: trimmedName,
+      phone: target.phone,
+    },
+  }
+}
+
+export function removeFallbackFriend(id) {
+  const target = fallbackFriends.find((item) => item.id === id)
+
+  if (!target) {
+    throw new ApiError({
+      code: 'FRIEND404_1',
+      status: 404,
+      message: '친구 정보를 찾을 수 없습니다',
+    })
+  }
+
+  fallbackFriends = fallbackFriends.filter((item) => item.id !== id)
+  return { ok: true }
 }

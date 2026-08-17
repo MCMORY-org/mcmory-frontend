@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 
+import AddPersonPage from '@/pages/AddPersonPage.jsx'
 import ComponentTestPage from '@/pages/ComponentTestPage.jsx'
 import GiftPage from '@/pages/GiftPage.jsx'
 import InviteSentPage from '@/pages/InviteSentPage.jsx'
@@ -9,10 +10,10 @@ import MainPage from '@/pages/MainPage.jsx'
 import MemoriesPage from '@/pages/MemoriesPage.jsx'
 import MemoryDetailPage from '@/pages/MemoryDetailPage.jsx'
 import MemoryPage from '@/pages/MemoryPage.jsx'
+import MyPage from '@/pages/MyPage.jsx'
 import OwnedPage from '@/pages/OwnedPage.jsx'
 import OwnedDetailPage from '@/pages/OwnedDetailPage.jsx'
 import OwnedStoresPage from '@/pages/OwnedStoresPage.jsx'
-import PeoplePage from '@/pages/PeoplePage.jsx'
 import RecommendPage from '@/pages/RecommendPage.jsx'
 import RecommendQuestionsPage from '@/pages/RecommendQuestionsPage.jsx'
 import SignupPage from '@/pages/SignupPage.jsx'
@@ -37,7 +38,10 @@ function App() {
       <Route path="/owned/:productId/stores" element={<OwnedStoresPage />} />
       <Route path="/memory" element={<MemoryPage />} />
       <Route path="/memory/sent" element={<InviteSentPage />} />
-      <Route path="/recommend/people" element={<PeoplePage />} />
+      <Route path="/my" element={<MyPage />} />
+      <Route path="/my/add" element={<AddPersonPage />} />
+      <Route path="/my/edit" element={<AddPersonPage />} />
+      <Route path="/recommend/people" element={<Navigate to="/my" replace />} />
     </Routes>
   )
 }

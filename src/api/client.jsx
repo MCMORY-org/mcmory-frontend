@@ -86,13 +86,15 @@ export function isServerUnavailable(error) {
   )
 }
 
-export async function withFallback(label, request, fallback) {
+export async function withFallback(label, request, fallback, { allowUnauthorized = false } = {}) {
   if (!USE_FALLBACK) return request()
 
   try {
     return await request()
   } catch (error) {
-    if (!isServerUnavailable(error)) throw error
+    const canFallback =
+      isServerUnavailable(error) || (allowUnauthorized && isUnauthorized(error))
+    if (!canFallback) throw error
     console.warn(`[API] ${label} 실패, 더미 데이터로 표시합니다.`, error)
     return typeof fallback === 'function' ? fallback() : fallback
   }
