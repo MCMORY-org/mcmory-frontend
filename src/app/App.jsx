@@ -14,6 +14,7 @@ import MyPage from '@/pages/MyPage.jsx'
 import OwnedPage from '@/pages/OwnedPage.jsx'
 import OwnedDetailPage from '@/pages/OwnedDetailPage.jsx'
 import OwnedStoresPage from '@/pages/OwnedStoresPage.jsx'
+import StoreReservePage from '@/pages/StoreReservePage.jsx'
 import RecommendPage from '@/pages/RecommendPage.jsx'
 import RecommendQuestionsPage from '@/pages/RecommendQuestionsPage.jsx'
 import SignupPage from '@/pages/SignupPage.jsx'
@@ -27,6 +28,7 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/test" element={<ComponentTestPage />} />
+      <Route path="/home" element={<RecommendPage />} />
       <Route path="/recommend" element={<RecommendPage />} />
       <Route path="/recommend/questions" element={<RecommendQuestionsPage />} />
       <Route path="/recommend/list" element={<Navigate to="/gift" replace />} />
@@ -36,6 +38,7 @@ function App() {
       <Route path="/owned" element={<OwnedPage />} />
       <Route path="/owned/:productId" element={<OwnedDetailPage />} />
       <Route path="/owned/:productId/stores" element={<OwnedStoresPage />} />
+      <Route path="/owned/:productId/stores/:storeId" element={<StoreReservePage />} />
       <Route path="/memory" element={<MemoryPage />} />
       <Route path="/memory/sent" element={<InviteSentPage />} />
       <Route path="/my" element={<MyPage />} />

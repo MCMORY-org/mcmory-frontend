@@ -2,7 +2,10 @@ import { apiRequest, withFallback } from '@/api/client.jsx'
 import { getFallbackLetters } from '@/api/dummyData.js'
 
 export function getLetters() {
-  return withFallback('GET /api/v1/letters', () => apiRequest('/api/v1/letters'), getFallbackLetters)
+  return withFallback('GET /api/v1/letters', () => apiRequest('/api/v1/letters'), getFallbackLetters, {
+    allowUnauthorized: true,
+    useIfEmpty: true,
+  })
 }
 
 export function mapReceivedMemory(item) {
@@ -19,6 +22,8 @@ export function mapReceivedMemory(item) {
     senderName: item.nickname,
     productName: item.productName,
     productId: item.productId,
+    imageUrl: item.imageUrl ?? null,
+    letterBody: item.letterBody ?? '',
     status: item.status,
     sentAt: item.sentAt,
     openedAt: item.openedAt,

@@ -27,7 +27,10 @@ export function mapOwnedProduct(item) {
 }
 
 export function listOwned() {
-  return withFallback('GET /api/v1/owned', () => apiRequest('/api/v1/owned'), getFallbackOwned)
+  return withFallback('GET /api/v1/owned', () => apiRequest('/api/v1/owned'), getFallbackOwned, {
+    allowUnauthorized: true,
+    useIfEmpty: true,
+  })
 }
 
 export function registerOwned(serial) {
@@ -39,6 +42,7 @@ export function registerOwned(serial) {
         body: JSON.stringify({ serial }),
       }),
     () => addFallbackOwned(serial),
+    { allowUnauthorized: true },
   )
 }
 
@@ -51,6 +55,7 @@ export function deleteOwned(id) {
         body: JSON.stringify({ id }),
       }),
     () => removeFallbackOwned(id),
+    { allowUnauthorized: true, allowNotFound: true },
   )
 }
 
@@ -60,6 +65,7 @@ export function getOwnedStyling(id, { aiReason = false } = {}) {
     `GET /api/v1/owned/${id}/styling`,
     () => apiRequest(`/api/v1/owned/${id}/styling${query}`),
     getFallbackStyling,
+    { allowUnauthorized: true, useIfEmpty: true },
   )
 }
 
@@ -68,5 +74,6 @@ export function getOwnedCareGuide(id) {
     `GET /api/v1/owned/${id}/care-guide`,
     () => apiRequest(`/api/v1/owned/${id}/care-guide`),
     getFallbackCareGuide,
+    { allowUnauthorized: true, useIfEmpty: true },
   )
 }

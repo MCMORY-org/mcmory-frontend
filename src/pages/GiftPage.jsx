@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import BottomTab from '@/components/layout/BottomTab'
+import tracyVisetos from '@/assets/images/tracy-visetos.png'
 
 const PRODUCTS = [
   {
@@ -9,18 +10,21 @@ const PRODUCTS = [
     name: 'Tracy 비세토스 크로스바디',
     description: '클래식한 취향의 연인에게 부담 없이 어울리는 라인',
     price: 1490000,
+    imageUrl: tracyVisetos,
   },
   {
     id: 'visetos-shoulder',
     name: '비세토스 숄더백',
     description: '실용적인 선물을 선호할 때 추천드리는 데일리 아이템',
     price: 1090000,
+    imageUrl: tracyVisetos,
   },
   {
     id: 'visetos-wallet',
     name: '비세토스 오리지널 카드 반지갑',
     description: '가벼운 선물이 필요할 때 좋은 합리적인 선택',
     price: 490000,
+    imageUrl: tracyVisetos,
   },
 ]
 
@@ -82,7 +86,15 @@ function GiftPage() {
                         : ''
                     }`}
                   >
-                    <span className="size-[74px] shrink-0 rounded-[10px] bg-[#EDE3D1] shadow-[2px_2px_4px_rgba(110,72,48,0.25)]" />
+                    {product.imageUrl ? (
+                      <img
+                        src={product.imageUrl}
+                        alt=""
+                        className="size-[74px] shrink-0 rounded-[10px] object-cover shadow-[2px_2px_4px_rgba(110,72,48,0.25)]"
+                      />
+                    ) : (
+                      <span className="size-[74px] shrink-0 rounded-[10px] bg-[#EDE3D1] shadow-[2px_2px_4px_rgba(110,72,48,0.25)]" />
+                    )}
                     <span className="flex min-w-0 flex-1 flex-col gap-[5px]">
                       <span className="text-[18px] font-semibold text-[#3E281B]">
                         {product.name}

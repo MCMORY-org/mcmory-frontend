@@ -11,7 +11,7 @@ export function listFriends() {
     'GET /api/v1/friends',
     () => apiRequest('/api/v1/friends'),
     getFallbackFriends,
-    { allowUnauthorized: true },
+    { allowUnauthorized: true, useIfEmpty: true },
   )
 }
 

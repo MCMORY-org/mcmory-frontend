@@ -8,7 +8,7 @@ import memoryIcon from '@/assets/icons/common-components/Memory.svg?raw'
 import myIcon from '@/assets/icons/common-components/My.svg?raw'
 
 const TAB_ITEMS = [
-  { id: 'home', label: '홈', icon: homeIcon, width: 18, path: '/recommend' },
+  { id: 'home', label: '홈', icon: homeIcon, width: 18, path: '/home' },
   { id: 'letter', label: '편지지', icon: letterIcon, width: 20 },
   { id: 'memory', label: '추억', icon: memoryIcon, width: 18, path: '/memories' },
   { id: 'manage', label: '관리', icon: manageIcon, width: 20, path: '/owned' },

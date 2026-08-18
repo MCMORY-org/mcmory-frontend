@@ -86,14 +86,36 @@ export function isServerUnavailable(error) {
   )
 }
 
-export async function withFallback(label, request, fallback, { allowUnauthorized = false } = {}) {
+function isEmptyCollection(result) {
+  if (result == null) return true
+  if (Array.isArray(result)) return result.length === 0
+
+  const collectionKeys = ['list', 'received', 'results', 'items']
+  const present = collectionKeys.filter((key) => Array.isArray(result[key]))
+  if (present.length === 0) return false
+  return present.every((key) => result[key].length === 0)
+}
+
+export async function withFallback(
+  label,
+  request,
+  fallback,
+  { allowUnauthorized = false, useIfEmpty = false, allowNotFound = false } = {},
+) {
   if (!USE_FALLBACK) return request()
 
   try {
-    return await request()
+    const result = await request()
+    if (useIfEmpty && isEmptyCollection(result)) {
+      console.warn(`[API] ${label} 빈 응답, 더미 데이터로 표시합니다.`)
+      return typeof fallback === 'function' ? fallback() : fallback
+    }
+    return result
   } catch (error) {
     const canFallback =
-      isServerUnavailable(error) || (allowUnauthorized && isUnauthorized(error))
+      isServerUnavailable(error) ||
+      (allowUnauthorized && isUnauthorized(error)) ||
+      (allowNotFound && (error.status === 404 || String(error.code ?? '').includes('404')))
     if (!canFallback) throw error
     console.warn(`[API] ${label} 실패, 더미 데이터로 표시합니다.`, error)
     return typeof fallback === 'function' ? fallback() : fallback

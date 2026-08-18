@@ -3,6 +3,16 @@
  * 목록·문구·매장 정보는 아래 상수만 수정하면 됩니다.
  */
 import { ApiError } from '@/api/client.jsx'
+import tracyVisetos from '@/assets/images/tracy-visetos.png'
+
+const IMG = {
+  tracy: tracyVisetos,
+  shoulder: tracyVisetos,
+  wallet: tracyVisetos,
+  card: tracyVisetos,
+  jacket: tracyVisetos,
+  pants: tracyVisetos,
+}
 
 export const DUMMY_SERIAL_PRODUCTS = {
   MX2024A031: 'Tracy 비세토스 크로스바디',
@@ -18,19 +28,30 @@ export const DUMMY_OWNED = [
     source: 'SERIAL',
     product: {
       name: 'Tracy 비세토스 크로스바디',
-      imageUrl: null,
+      imageUrl: IMG.tracy,
       productId: 101,
     },
   },
   {
     id: 2,
-    createdAt: '2026-08-06T00:00:00',
+    createdAt: '2026-07-18T00:00:00',
     serialMemo: 'MX2024B102',
     source: 'SERIAL',
     product: {
       name: '비세토스 숄더백',
-      imageUrl: null,
+      imageUrl: IMG.shoulder,
       productId: 102,
+    },
+  },
+  {
+    id: 3,
+    createdAt: '2026-06-02T00:00:00',
+    serialMemo: 'MX2024C203',
+    source: 'SERIAL',
+    product: {
+      name: '비세토스 오리지널 카드 반지갑',
+      imageUrl: IMG.wallet,
+      productId: 103,
     },
   },
 ]
@@ -40,30 +61,48 @@ export const DUMMY_LETTERS = {
   received: [
     {
       id: 1,
-      nickname: '아기호저들',
+      nickname: '민지',
       productName: 'Tracy 비세토스 크로스바디',
       productId: 101,
+      imageUrl: IMG.tracy,
+      letterBody:
+        '생일 축하해! 네가 오래 쓸 수 있는 가방으로 골랐어. 함께한 순간들이 더 특별해지길 바라.',
       status: 'SENT',
-      sentAt: '2026-08-06T00:00:00',
+      sentAt: '2026-08-12T00:00:00',
       openedAt: null,
     },
     {
       id: 2,
-      nickname: '아기호저들',
+      nickname: '준호',
       productName: '비세토스 오리지널 카드 반지갑',
       productId: 103,
+      imageUrl: IMG.wallet,
+      letterBody: '승진 정말 축하해. 작은 선물이지만 매일 들고 다니며 응원하고 싶어.',
       status: 'SENT',
-      sentAt: '2025-08-06T00:00:00',
+      sentAt: '2026-08-08T00:00:00',
       openedAt: null,
     },
     {
       id: 3,
+      nickname: '서연',
+      productName: '비세토스 숄더백',
+      productId: 102,
+      imageUrl: IMG.shoulder,
+      letterBody: '졸업 축하해! 새로운 시작에 잘 어울릴 것 같아서 골랐어. 늘 응원할게.',
+      status: 'OPENED',
+      sentAt: '2026-07-21T00:00:00',
+      openedAt: '2026-07-22T00:00:00',
+    },
+    {
+      id: 4,
       nickname: '멋쟁이사자처럼',
       productName: 'Tracy 비세토스 크로스바디',
       productId: 101,
+      imageUrl: IMG.tracy,
+      letterBody: '프로젝트 끝까지 고생했어. 우리의 추억을 이 선물에 담아 보낼게.',
       status: 'OPENED',
-      sentAt: '2026-08-06T00:00:00',
-      openedAt: '2026-08-07T00:00:00',
+      sentAt: '2026-06-30T00:00:00',
+      openedAt: '2026-07-01T00:00:00',
     },
   ],
 }
@@ -72,7 +111,7 @@ export const DUMMY_STYLING = {
   reasonSource: 'LLM',
   product: {
     name: 'Tracy 비세토스 크로스바디',
-    imageUrl: null,
+    imageUrl: IMG.tracy,
   },
   results: [
     {
@@ -81,8 +120,8 @@ export const DUMMY_STYLING = {
       category: '가죽 소품',
       name: '미니 Aren 비세토스 카드 케이스',
       price: 290000,
-      imageUrl: null,
-      officialUrl: null,
+      imageUrl: IMG.card,
+      officialUrl: 'https://www.mcmworldwide.com/',
     },
     {
       productId: 202,
@@ -90,8 +129,8 @@ export const DUMMY_STYLING = {
       category: 'WOMAN OUTER',
       name: '워싱 데님 재킷',
       price: 1250000,
-      imageUrl: null,
-      officialUrl: null,
+      imageUrl: IMG.jacket,
+      officialUrl: 'https://www.mcmworldwide.com/',
     },
     {
       productId: 203,
@@ -99,8 +138,8 @@ export const DUMMY_STYLING = {
       category: 'WOMAN BOTTOM',
       name: '루렉스 데님 플레어 팬츠',
       price: 830000,
-      imageUrl: null,
-      officialUrl: null,
+      imageUrl: IMG.pants,
+      officialUrl: 'https://www.mcmworldwide.com/',
     },
   ],
 }
@@ -117,7 +156,7 @@ export const DUMMY_STORES = [
   {
     id: 1,
     name: 'MCM 강남 본점',
-    address: '서울 강남구 압구정로',
+    address: '서울 강남구 압구정로 165',
     distanceKm: 1.2,
     closeTime: '20:00',
     repairAvailable: true,
@@ -129,7 +168,7 @@ export const DUMMY_STORES = [
   {
     id: 2,
     name: 'MCM 갤러리아 명품관',
-    address: '서울 강남구 압구정로',
+    address: '서울 강남구 압구정로 343',
     distanceKm: 2.8,
     closeTime: '20:30',
     repairAvailable: true,
@@ -140,29 +179,65 @@ export const DUMMY_STORES = [
   },
   {
     id: 3,
+    name: 'MCM 신세계 강남',
+    address: '서울 서초구 신반포로 176',
+    distanceKm: 3.4,
+    closeTime: '21:00',
+    repairAvailable: false,
+    openNow: true,
+    reservable: true,
+    latitude: 37.5046,
+    longitude: 127.0042,
+  },
+  {
+    id: 4,
     name: 'MCM 서초 서비스센터',
-    address: '서울 서초구 서초대로',
+    address: '서울 서초구 서초대로 396',
     distanceKm: 4.1,
     closeTime: '19:00',
     repairAvailable: true,
-    openNow: true,
-    reservable: true,
+    openNow: false,
+    reservable: false,
     latitude: 37.4919,
     longitude: 127.0079,
+  },
+  {
+    id: 5,
+    name: 'MCM 롯데본점',
+    address: '서울 중구 남대문로 81',
+    distanceKm: 6.5,
+    closeTime: '20:00',
+    repairAvailable: true,
+    openNow: true,
+    reservable: true,
+    latitude: 37.5647,
+    longitude: 126.9816,
   },
 ]
 
 export const DUMMY_USER = {
   name: '아기호저들',
-  phone: '',
+  phone: '01011112222',
 }
 
 export const DUMMY_FRIENDS = [
   {
     id: 1,
-    name: '친구 2',
+    name: '민지',
     phone: '01012345678',
-    tasteSummary: '',
+    tasteSummary: '미니멀 · 데일리',
+  },
+  {
+    id: 2,
+    name: '준호',
+    phone: '01087654321',
+    tasteSummary: '클래식 · 가죽',
+  },
+  {
+    id: 3,
+    name: '서연',
+    phone: '01055556666',
+    tasteSummary: '캐주얼 · 데님',
   },
 ]
 
@@ -194,6 +269,11 @@ export function addFallbackOwned(serial) {
   }
 
   const nextId = Math.max(0, ...fallbackOwned.map((item) => Number(item.id) || 0)) + 1
+  const imageBySerial = {
+    MX2024A031: IMG.tracy,
+    MX2024B102: IMG.shoulder,
+    MX2024C203: IMG.wallet,
+  }
   const item = {
     id: nextId,
     createdAt: new Date().toISOString(),
@@ -201,7 +281,7 @@ export function addFallbackOwned(serial) {
     source: 'SERIAL',
     product: {
       name: DUMMY_SERIAL_PRODUCTS[normalized] ?? serial.trim(),
-      imageUrl: null,
+      imageUrl: imageBySerial[normalized] ?? null,
       productId: nextId,
     },
   }
@@ -234,6 +314,21 @@ export function getFallbackCareGuide() {
   return { items: [...DUMMY_CARE_GUIDE.items] }
 }
 
+export const TIME_SLOTS = [
+  '10:00',
+  '11:00',
+  '13:00',
+  '14:00',
+  '15:00',
+  '16:00',
+  '17:00',
+  '18:00',
+  '19:00',
+  '20:00',
+]
+
+const DEMO_BOOKED_SLOTS = new Set(['14:00', '16:00', '20:00'])
+
 export function getFallbackStores({ repair = false, openNow = false, reservable = false } = {}) {
   let list = DUMMY_STORES
 
@@ -241,7 +336,36 @@ export function getFallbackStores({ repair = false, openNow = false, reservable 
   if (openNow) list = list.filter((store) => store.openNow)
   if (reservable) list = list.filter((store) => store.reservable)
 
-  return { list: list.map((store) => ({ ...store })) }
+  return { list: list.map((store) => ({ ...store })), slots: null }
+}
+
+export function getFallbackSlots({ date } = {}) {
+  const now = Date.now()
+  const slots = TIME_SLOTS.map((slot) => {
+    const [hour, minute] = slot.split(':').map(Number)
+    const slotTime = new Date(`${date}T00:00:00`)
+    if (Number.isNaN(slotTime.getTime())) {
+      return { slot, state: 'AVAILABLE', reason: null }
+    }
+    slotTime.setHours(hour, minute, 0, 0)
+
+    if (slotTime.getTime() <= now + 60 * 60 * 1000) {
+      return { slot, state: 'DISABLED', reason: 'PAST' }
+    }
+    if (DEMO_BOOKED_SLOTS.has(slot)) {
+      return { slot, state: 'DISABLED', reason: 'BOOKED' }
+    }
+    return { slot, state: 'AVAILABLE', reason: null }
+  })
+
+  return {
+    list: DUMMY_STORES.map((store) => ({ ...store })),
+    slots,
+  }
+}
+
+export function addFallbackReservation() {
+  return { ok: true, id: Date.now() }
 }
 
 export function getFallbackAuthResult(payload = {}) {

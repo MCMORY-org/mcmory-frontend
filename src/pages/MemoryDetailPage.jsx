@@ -18,7 +18,7 @@ function MemoryDetailPage() {
   const { memoryId } = useParams()
   const location = useLocation()
   const [memory, setMemory] = useState(location.state?.memory ?? null)
-  const [imageUrl, setImageUrl] = useState(null)
+  const [imageUrl, setImageUrl] = useState(location.state?.memory?.imageUrl ?? null)
   const [isLoading, setIsLoading] = useState(!location.state?.memory)
   const [notFound, setNotFound] = useState(false)
 
@@ -48,7 +48,7 @@ function MemoryDetailPage() {
         const matched = (owned?.list ?? []).find(
           (item) => item.product?.productId === found.productId,
         )
-        setImageUrl(matched?.product?.imageUrl ?? null)
+        setImageUrl(found.imageUrl ?? matched?.product?.imageUrl ?? null)
       } catch (error) {
         if (cancelled) return
         if (isUnauthorized(error)) {
@@ -120,9 +120,10 @@ function MemoryDetailPage() {
                   <h2 className="w-full text-[18px] font-semibold text-[#3E281B]">
                     제품 정보
                   </h2>
-                  <p className="w-full text-[12px] leading-[1.5] font-normal break-keep text-[#947C50]">
-                    편지 본문은 초대장 링크에서만 확인할 수 있어요. 발송자가 보낸
-                    링크로 추억을 열어주세요.
+                  <p className="w-full text-[12px] leading-[1.5] font-normal break-keep whitespace-pre-line text-[#947C50]">
+                    {memory?.letterBody
+                      ? memory.letterBody
+                      : '편지 본문은 초대장 링크에서만 확인할 수 있어요. 발송자가 보낸 링크로 추억을 열어주세요.'}
                   </p>
                 </div>
               </section>

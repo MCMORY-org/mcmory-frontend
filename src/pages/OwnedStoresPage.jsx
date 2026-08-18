@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import L from 'leaflet'
 
 import { isUnauthorized } from '@/api/client.jsx'
 import { listOwned, mapOwnedProduct } from '@/api/owned.jsx'
-import { getStores } from '@/api/stores.jsx'
+import { getStores, withStoreCoordinates } from '@/api/stores.jsx'
 import BottomTab from '@/components/layout/BottomTab'
 
 const SEOUL_CENTER = [37.517, 127.028]
@@ -16,19 +16,28 @@ const FILTERS = [
 ]
 
 function getStoreLatLng(store) {
-  if (Number.isFinite(store?.latitude) && Number.isFinite(store?.longitude)) {
-    return [store.latitude, store.longitude]
+  const latitude = Number(store?.latitude)
+  const longitude = Number(store?.longitude)
+  if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+    return [latitude, longitude]
   }
   return null
 }
 
-function getMapCenter(stores = []) {
-  const points = stores.map(getStoreLatLng).filter(Boolean)
-  if (points.length === 0) return SEOUL_CENTER
+function findNearestStore(latlng, stores = []) {
+  let nearest = null
 
-  const lat = points.reduce((sum, [value]) => sum + value, 0) / points.length
-  const lng = points.reduce((sum, [, value]) => sum + value, 0) / points.length
-  return [lat, lng]
+  stores.forEach((store, index) => {
+    const point = getStoreLatLng(store)
+    if (!point) return
+    const distance = latlng.distanceTo(point)
+    if (distance > 450) return
+    if (!nearest || distance < nearest.distance) {
+      nearest = { store, number: index + 1, distance }
+    }
+  })
+
+  return nearest
 }
 
 function OwnedStoresPage() {
@@ -88,7 +97,7 @@ function OwnedStoresPage() {
           openNow: selectedFilters.includes('openNow'),
           reservable: selectedFilters.includes('reservable'),
         })
-        if (!cancelled) setStores(result?.list ?? [])
+        if (!cancelled) setStores(withStoreCoordinates(result?.list ?? []))
       } catch (error) {
         if (cancelled) return
         setErrorMessage(error.message ?? '매장 정보를 불러오지 못했습니다.')
@@ -102,6 +111,15 @@ function OwnedStoresPage() {
       cancelled = true
     }
   }, [selectedFilters])
+
+  const handleStoreSelect = useCallback(
+    (store, number) => {
+      navigate(`/owned/${ownedId}/stores/${store.id}`, {
+        state: { product, store, storeNumber: number },
+      })
+    },
+    [navigate, ownedId, product],
+  )
 
   if (notFound) {
     return <Navigate to="/owned" replace />
@@ -146,7 +164,7 @@ function OwnedStoresPage() {
           </div>
 
           <div className="flex flex-col gap-5">
-            <StoreMap stores={stores} />
+            <StoreMap stores={stores} onStoreClick={handleStoreSelect} />
 
             <div className="flex flex-wrap items-start gap-2.5">
               {FILTERS.map((filter) => {
@@ -187,7 +205,11 @@ function OwnedStoresPage() {
               <ul className="flex flex-col gap-5">
                 {stores.map((store, index) => (
                   <li key={store.id}>
-                    <StoreCard store={store} number={index + 1} />
+                    <StoreCard
+                      store={store}
+                      number={index + 1}
+                      onSelect={() => handleStoreSelect(store, index + 1)}
+                    />
                   </li>
                 ))}
               </ul>
@@ -211,19 +233,26 @@ function OwnedStoresPage() {
   )
 }
 
-function StoreMap({ stores }) {
+function StoreMap({ stores, onStoreClick }) {
   const containerRef = useRef(null)
   const mapRef = useRef(null)
   const markersRef = useRef([])
+  const onStoreClickRef = useRef(onStoreClick)
+  const storesRef = useRef(stores)
+  const [mapReady, setMapReady] = useState(false)
+
+  onStoreClickRef.current = onStoreClick
+  storesRef.current = stores
 
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return undefined
+    const container = containerRef.current
+    if (!container || mapRef.current) return undefined
 
-    const map = L.map(containerRef.current, {
+    const map = L.map(container, {
       scrollWheelZoom: true,
       zoomControl: false,
       attributionControl: false,
-    }).setView(getMapCenter([]), 13)
+    }).setView(SEOUL_CENTER, 13)
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap',
@@ -232,13 +261,21 @@ function StoreMap({ stores }) {
     L.control.zoom({ position: 'topright' }).addTo(map)
     L.control.attribution({ prefix: false, position: 'bottomright' }).addTo(map)
 
+    map.on('click', (event) => {
+      const nearest = findNearestStore(event.latlng, storesRef.current)
+      if (!nearest) return
+      onStoreClickRef.current?.(nearest.store, nearest.number)
+    })
+
     mapRef.current = map
+    setMapReady(true)
     const frameId = window.requestAnimationFrame(() => map.invalidateSize())
     const timeoutId = window.setTimeout(() => map.invalidateSize(), 150)
 
     return () => {
       window.cancelAnimationFrame(frameId)
       window.clearTimeout(timeoutId)
+      setMapReady(false)
       map.remove()
       mapRef.current = null
     }
@@ -246,7 +283,7 @@ function StoreMap({ stores }) {
 
   useEffect(() => {
     const map = mapRef.current
-    if (!map) return
+    if (!mapReady || !map) return
 
     markersRef.current.forEach((marker) => marker.remove())
     markersRef.current = []
@@ -258,10 +295,13 @@ function StoreMap({ stores }) {
       points.push(latLng)
 
       const marker = L.marker(latLng, {
+        interactive: true,
+        keyboard: true,
+        riseOnHover: true,
         icon: L.divIcon({
           className: 'store-map-pin',
-          iconSize: [28, 36],
-          iconAnchor: [14, 36],
+          iconSize: [36, 44],
+          iconAnchor: [18, 44],
           html: `<div class="store-map-pin-inner">
             <svg viewBox="0 0 28 36" width="28" height="36" aria-hidden="true">
               <path d="M14 0C6.268 0 0 6.13 0 13.68C0 23.63 14 36 14 36S28 23.63 28 13.68C28 6.13 21.732 0 14 0Z" fill="#6E4830"></path>
@@ -273,6 +313,10 @@ function StoreMap({ stores }) {
         title: store.name,
       }).addTo(map)
 
+      marker.on('click', (event) => {
+        L.DomEvent.stopPropagation(event)
+        onStoreClickRef.current?.(store, index + 1)
+      })
       markersRef.current.push(marker)
     })
 
@@ -281,11 +325,11 @@ function StoreMap({ stores }) {
     } else if (points.length > 1) {
       map.fitBounds(points, { padding: [28, 28], maxZoom: 16 })
     } else {
-      map.setView(getMapCenter([]), 13)
+      map.setView(SEOUL_CENTER, 13)
     }
 
     map.invalidateSize()
-  }, [stores])
+  }, [mapReady, stores])
 
   return (
     <div className="store-map relative h-[260px] w-full overflow-hidden rounded-[10px] bg-[#e6e4e0]">
@@ -294,13 +338,17 @@ function StoreMap({ stores }) {
   )
 }
 
-function StoreCard({ store, number }) {
+function StoreCard({ store, number, onSelect }) {
   const detail = [store.address, store.distanceKm != null ? `${store.distanceKm}km` : null, store.closeTime ? `~${store.closeTime} 영업` : null]
     .filter(Boolean)
     .join(' · ')
 
   return (
-    <article className="flex h-[75px] w-full items-center rounded-[20px] bg-[#FAF9F6] px-[15px] shadow-[2px_4px_10px_rgba(138,90,60,0.25)]">
+    <button
+      type="button"
+      onClick={onSelect}
+      className="flex h-[75px] w-full items-center rounded-[20px] bg-[#FAF9F6] px-[15px] text-left shadow-[2px_4px_10px_rgba(138,90,60,0.25)]"
+    >
       <div className="flex min-w-0 flex-1 items-center gap-[21px]">
         <span className="flex size-[38px] shrink-0 items-center justify-center rounded-full bg-primary text-[16px] font-semibold text-[#F9F6F0]">
           {number}
@@ -335,7 +383,7 @@ function StoreCard({ store, number }) {
           strokeLinejoin="round"
         />
       </svg>
-    </article>
+    </button>
   )
 }
 
