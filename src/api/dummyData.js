@@ -123,6 +123,8 @@ export const DUMMY_STORES = [
     repairAvailable: true,
     openNow: true,
     reservable: true,
+    latitude: 37.5269,
+    longitude: 127.0408,
   },
   {
     id: 2,
@@ -133,6 +135,8 @@ export const DUMMY_STORES = [
     repairAvailable: true,
     openNow: true,
     reservable: true,
+    latitude: 37.5284,
+    longitude: 127.0402,
   },
   {
     id: 3,
@@ -143,6 +147,8 @@ export const DUMMY_STORES = [
     repairAvailable: true,
     openNow: true,
     reservable: true,
+    latitude: 37.4919,
+    longitude: 127.0079,
   },
 ]
 
