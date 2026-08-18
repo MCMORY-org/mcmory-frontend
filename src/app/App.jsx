@@ -9,6 +9,9 @@ import MainPage from '@/pages/MainPage.jsx'
 import MemoriesPage from '@/pages/MemoriesPage.jsx'
 import MemoryDetailPage from '@/pages/MemoryDetailPage.jsx'
 import MemoryPage from '@/pages/MemoryPage.jsx'
+import OwnedPage from '@/pages/OwnedPage.jsx'
+import OwnedDetailPage from '@/pages/OwnedDetailPage.jsx'
+import OwnedStoresPage from '@/pages/OwnedStoresPage.jsx'
 import PeoplePage from '@/pages/PeoplePage.jsx'
 import RecommendPage from '@/pages/RecommendPage.jsx'
 import RecommendQuestionsPage from '@/pages/RecommendQuestionsPage.jsx'
@@ -29,6 +32,9 @@ function App() {
       <Route path="/gift" element={<GiftPage />} />
       <Route path="/memories" element={<MemoriesPage />} />
       <Route path="/memories/:memoryId" element={<MemoryDetailPage />} />
+      <Route path="/owned" element={<OwnedPage />} />
+      <Route path="/owned/:productId" element={<OwnedDetailPage />} />
+      <Route path="/owned/:productId/stores" element={<OwnedStoresPage />} />
       <Route path="/memory" element={<MemoryPage />} />
       <Route path="/memory/sent" element={<InviteSentPage />} />
       <Route path="/recommend/people" element={<PeoplePage />} />
