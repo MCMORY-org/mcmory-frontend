@@ -1,0 +1,123 @@
+import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+
+import BottomTab from '@/components/layout/BottomTab'
+
+const PRODUCTS = [
+  {
+    id: 'tracy-crossbody',
+    name: 'Tracy 비세토스 크로스바디',
+    description: '클래식한 취향의 연인에게 부담 없이 어울리는 라인',
+    price: 1490000,
+  },
+  {
+    id: 'visetos-shoulder',
+    name: '비세토스 숄더백',
+    description: '실용적인 선물을 선호할 때 추천드리는 데일리 아이템',
+    price: 1090000,
+  },
+  {
+    id: 'visetos-wallet',
+    name: '비세토스 오리지널 카드 반지갑',
+    description: '가벼운 선물이 필요할 때 좋은 합리적인 선택',
+    price: 490000,
+  },
+]
+
+function GiftPage() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [selectedId, setSelectedId] = useState(
+    () => location.state?.selectedGiftId ?? '',
+  )
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    const gift = PRODUCTS.find((product) => product.id === selectedId)
+    if (!gift) return
+
+    navigate('/memory', {
+      state: {
+        recipientName: location.state?.recipientName,
+        gift,
+      },
+    })
+  }
+
+  return (
+    <main className="relative mx-auto flex h-dvh w-full max-w-[412px] flex-col overflow-hidden bg-background">
+      <form
+        onSubmit={handleSubmit}
+        className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
+      >
+        <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
+          <div className="no-scrollbar absolute inset-0 flex flex-col overflow-y-auto px-4 pt-[30px]">
+          <p className="w-[261px] text-[13px] leading-[1.4] font-medium text-primary-active">
+            선물을 받는 분의 취향을
+            <br />
+            MCMORY AI와 함께 찾아가요
+          </p>
+
+          <h1 className="mt-[35px] text-h1 text-primary-dark-active">
+            MCM LIST
+          </h1>
+          <p className="mt-2.5 text-[13px] font-medium text-[#947C50]">
+            입력하신 내용을 바탕으로 3가지를 골라봤어요
+          </p>
+
+          <div className="min-h-[15px] flex-1" />
+
+          <ul className="flex flex-col gap-[15px]">
+            {PRODUCTS.map((product) => {
+              const selected = product.id === selectedId
+
+              return (
+                <li key={product.id}>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedId(product.id)}
+                    className={`flex w-full items-center gap-[25px] rounded-[20px] bg-[#FAF9F6] px-[15px] py-[13px] text-left shadow-[2px_4px_10px_rgba(138,90,60,0.25)] ${
+                      selected
+                        ? 'outline outline-1 -outline-offset-1 outline-[#8A5A3C]'
+                        : ''
+                    }`}
+                  >
+                    <span className="size-[74px] shrink-0 rounded-[10px] bg-[#EDE3D1] shadow-[2px_2px_4px_rgba(110,72,48,0.25)]" />
+                    <span className="flex min-w-0 flex-1 flex-col gap-[5px]">
+                      <span className="text-[18px] font-semibold text-[#3E281B]">
+                        {product.name}
+                      </span>
+                      <span className="break-keep text-[13px] font-medium text-[#947C50]">
+                        {product.description}
+                      </span>
+                      <span className="text-[13px] font-medium text-[#947C50]">
+                        KRW {product.price.toLocaleString('ko-KR')}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+
+          <div className="min-h-[15px] flex-1" />
+          </div>
+        </div>
+
+        <div className="shrink-0 px-4 pb-3">
+          <button
+            type="submit"
+            disabled={!selectedId}
+            className="flex w-full items-center justify-center rounded-[10px] bg-primary px-5 py-2.5 text-button text-background disabled:opacity-40"
+          >
+            SAVE STYLE
+          </button>
+        </div>
+      </form>
+
+      <BottomTab activeTab="home" />
+    </main>
+  )
+}
+
+export default GiftPage

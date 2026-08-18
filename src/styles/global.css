@@ -14,30 +14,55 @@
 
 html {
   min-width: 320px;
-  min-height: 100%;
+  height: 100dvh;
+  overflow: hidden;
   background-color: var(--color-background);
 }
 
 body {
   min-width: 320px;
-  min-height: 100dvh;
+  height: 100dvh;
   margin: 0;
+  overflow: hidden;
   background-color: var(--color-background);
 }
 
 #root {
-  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
-button,
-input,
-textarea,
-select {
-  font: inherit;
+html,
+body,
+#root,
+.no-scrollbar {
+  scrollbar-width: none;
+  scrollbar-gutter: auto;
+  -ms-overflow-style: none;
 }
 
-button {
-  cursor: pointer;
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#root::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+@layer base {
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  button {
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+  }
 }
 
 button:disabled {
@@ -56,3 +81,7 @@ svg {
   max-width: 100%;
 }
 
+a {
+  color: inherit;
+  text-decoration: none;
+}
