@@ -30,7 +30,7 @@ function BottomTab({
   activeTab,
   defaultActiveTab = 'home',
   onTabChange,
-  badges = { memory: 2 },
+  badges = {},
 }) {
   const navigate = useNavigate()
   const [internalActiveTab, setInternalActiveTab] = useState(defaultActiveTab)

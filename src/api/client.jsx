@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.cartlab.store'
+import { API_BASE_URL, USE_FALLBACK } from '@/api/config.js'
 
 export class ApiError extends Error {
   constructor({ message, code = 'UNKNOWN', status = 0, cause }) {
@@ -68,4 +68,32 @@ export async function apiRequest(path, options = {}) {
   }
 
   return data.result
+}
+
+export function isUnauthorized(error) {
+  return error instanceof ApiError && error.code === 'AUTH401_1'
+}
+
+export function isServerUnavailable(error) {
+  if (!(error instanceof ApiError)) return true
+  if (isUnauthorized(error)) return false
+
+  return (
+    error.code === 'NETWORK_ERROR' ||
+    error.code === 'INVALID_SERVER_RESPONSE' ||
+    error.status === 0 ||
+    error.status >= 500
+  )
+}
+
+export async function withFallback(label, request, fallback) {
+  if (!USE_FALLBACK) return request()
+
+  try {
+    return await request()
+  } catch (error) {
+    if (!isServerUnavailable(error)) throw error
+    console.warn(`[API] ${label} 실패, 더미 데이터로 표시합니다.`, error)
+    return typeof fallback === 'function' ? fallback() : fallback
+  }
 }

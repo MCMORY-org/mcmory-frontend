@@ -123,6 +123,10 @@ body::-webkit-scrollbar,
   text-align: center;
 }
 
+button:disabled {
+  cursor: not-allowed;
+}
+
 input,
 textarea,
 select {

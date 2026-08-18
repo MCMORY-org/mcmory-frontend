@@ -2,49 +2,17 @@ import { useEffect, useRef, useState } from 'react'
 import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import L from 'leaflet'
 
+import { isUnauthorized } from '@/api/client.jsx'
+import { listOwned, mapOwnedProduct } from '@/api/owned.jsx'
+import { getStores } from '@/api/stores.jsx'
 import BottomTab from '@/components/layout/BottomTab'
-
-import { INITIAL_PRODUCTS } from './OwnedPage.jsx'
 
 const SEOUL_CENTER = [37.517, 127.028]
 
 const FILTERS = [
-  { id: 'repairable', label: '이 제품 수리 가능' },
-  { id: 'open', label: '지금 영업중' },
+  { id: 'repair', label: '이 제품 수리 가능' },
+  { id: 'openNow', label: '지금 영업중' },
   { id: 'reservable', label: '예약 가능' },
-]
-
-const STORES = [
-  {
-    id: 1,
-    name: 'MCM 강남 본점',
-    detail: '서울 강남구 압구정로 · 1.2km · ~20:00 영업',
-    repairable: true,
-    open: true,
-    reservable: true,
-    latitude: 37.5269,
-    longitude: 127.0408,
-  },
-  {
-    id: 2,
-    name: 'MCM 갤러리아 명품관',
-    detail: '서울 강남구 압구정로 · 2.8km · ~20:30 영업',
-    repairable: true,
-    open: true,
-    reservable: true,
-    latitude: 37.5284,
-    longitude: 127.0402,
-  },
-  {
-    id: 3,
-    name: 'MCM 서초 서비스센터',
-    detail: '서울 서초구 서초대로 · 4.1km · ~19:00 영업',
-    repairable: true,
-    open: true,
-    reservable: true,
-    latitude: 37.4919,
-    longitude: 127.0079,
-  },
 ]
 
 function getStoreLatLng(store) {
@@ -67,12 +35,75 @@ function OwnedStoresPage() {
   const navigate = useNavigate()
   const { productId } = useParams()
   const location = useLocation()
-  const [selectedFilters, setSelectedFilters] = useState(['repairable'])
-  const product =
-    location.state?.product ??
-    INITIAL_PRODUCTS.find((item) => item.id === productId)
+  const ownedId = Number(productId)
+  const [selectedFilters, setSelectedFilters] = useState(['repair'])
+  const [product, setProduct] = useState(location.state?.product ?? null)
+  const [stores, setStores] = useState([])
+  const [errorMessage, setErrorMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [notFound, setNotFound] = useState(Number.isNaN(ownedId))
 
-  if (!product) {
+  useEffect(() => {
+    if (Number.isNaN(ownedId) || location.state?.product) return undefined
+
+    let cancelled = false
+
+    async function loadProduct() {
+      try {
+        const result = await listOwned()
+        if (cancelled) return
+        const found = (result?.list ?? [])
+          .map(mapOwnedProduct)
+          .find((item) => item.id === ownedId)
+        if (!found) {
+          setNotFound(true)
+          return
+        }
+        setProduct(found)
+      } catch (error) {
+        if (cancelled) return
+        if (isUnauthorized(error)) {
+          navigate('/login', { replace: true })
+          return
+        }
+        setErrorMessage(error.message ?? '제품 정보를 불러오지 못했습니다.')
+      }
+    }
+
+    loadProduct()
+    return () => {
+      cancelled = true
+    }
+  }, [ownedId, location.state?.product, navigate])
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadStores() {
+      setIsLoading(true)
+      setErrorMessage('')
+      try {
+        const result = await getStores({
+          repair: selectedFilters.includes('repair'),
+          openNow: selectedFilters.includes('openNow'),
+          reservable: selectedFilters.includes('reservable'),
+        })
+        if (!cancelled) setStores(result?.list ?? [])
+      } catch (error) {
+        if (cancelled) return
+        setErrorMessage(error.message ?? '매장 정보를 불러오지 못했습니다.')
+      } finally {
+        if (!cancelled) setIsLoading(false)
+      }
+    }
+
+    loadStores()
+    return () => {
+      cancelled = true
+    }
+  }, [selectedFilters])
+
+  if (notFound) {
     return <Navigate to="/owned" replace />
   }
 
@@ -84,10 +115,6 @@ function OwnedStoresPage() {
     )
   }
 
-  const visibleStores = STORES.filter((store) =>
-    selectedFilters.every((filterId) => store[filterId]),
-  )
-
   return (
     <main className="relative mx-auto flex h-dvh w-full max-w-[412px] flex-col overflow-hidden bg-background">
       <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
@@ -97,7 +124,7 @@ function OwnedStoresPage() {
               type="button"
               aria-label="뒤로 가기"
               onClick={() =>
-                navigate(`/owned/${product.id}`, { state: { product } })
+                navigate(`/owned/${ownedId}`, { state: { product } })
               }
               className="flex size-8 items-center justify-center bg-transparent"
             >
@@ -119,7 +146,7 @@ function OwnedStoresPage() {
           </div>
 
           <div className="flex flex-col gap-5">
-            <StoreMap stores={visibleStores} />
+            <StoreMap stores={stores} />
 
             <div className="flex flex-wrap items-start gap-2.5">
               {FILTERS.map((filter) => {
@@ -142,16 +169,32 @@ function OwnedStoresPage() {
               })}
             </div>
 
-            <ul className="flex flex-col gap-5">
-              {visibleStores.map((store) => (
-                <li key={store.id}>
-                  <StoreCard store={store} />
-                </li>
-              ))}
-            </ul>
+            {errorMessage ? (
+              <p role="alert" className="text-[12px] font-medium text-[#9E2A2B]">
+                {errorMessage}
+              </p>
+            ) : null}
+
+            {isLoading ? (
+              <p className="text-center text-[13px] font-medium text-[#947C50]">
+                불러오는 중...
+              </p>
+            ) : stores.length === 0 ? (
+              <p className="text-center text-[13px] font-medium text-[#947C50]">
+                조건에 맞는 매장이 없어요
+              </p>
+            ) : (
+              <ul className="flex flex-col gap-5">
+                {stores.map((store, index) => (
+                  <li key={store.id}>
+                    <StoreCard store={store} number={index + 1} />
+                  </li>
+                ))}
+              </ul>
+            )}
 
             <p className="text-[16px] leading-[1.4] font-semibold break-keep">
-              <span className="text-[#3E281B]">{product.name}</span>
+              <span className="text-[#3E281B]">{product?.name ?? '이 제품'}</span>
               <span className="text-[#947C50]">
                 {' '}
                 수리가 가능한
@@ -251,26 +294,30 @@ function StoreMap({ stores }) {
   )
 }
 
-function StoreCard({ store }) {
+function StoreCard({ store, number }) {
+  const detail = [store.address, store.distanceKm != null ? `${store.distanceKm}km` : null, store.closeTime ? `~${store.closeTime} 영업` : null]
+    .filter(Boolean)
+    .join(' · ')
+
   return (
     <article className="flex h-[75px] w-full items-center rounded-[20px] bg-[#FAF9F6] px-[15px] shadow-[2px_4px_10px_rgba(138,90,60,0.25)]">
       <div className="flex min-w-0 flex-1 items-center gap-[21px]">
         <span className="flex size-[38px] shrink-0 items-center justify-center rounded-full bg-primary text-[16px] font-semibold text-[#F9F6F0]">
-          {store.id}
+          {number}
         </span>
         <div className="flex min-w-0 flex-1 flex-col items-start gap-[5px]">
           <div className="flex w-full items-center gap-[7px]">
             <p className="text-[16px] font-semibold text-[#3E281B]">
               {store.name}
             </p>
-            {store.repairable ? (
+            {store.repairAvailable ? (
               <span className="flex h-[17px] shrink-0 items-center justify-center rounded-[20px] bg-[#DDEDD1] px-2.5 text-[10px] font-medium text-[#3E281B]">
                 수리 가능
               </span>
             ) : null}
           </div>
           <p className="w-full text-[12px] font-normal text-[#947C50]">
-            {store.detail}
+            {detail}
           </p>
         </div>
       </div>

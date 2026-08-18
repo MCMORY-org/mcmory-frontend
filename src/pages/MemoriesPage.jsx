@@ -1,75 +1,45 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { isUnauthorized } from '@/api/client.jsx'
+import { getLetters, mapReceivedMemory } from '@/api/letters.jsx'
 import BottomTab from '@/components/layout/BottomTab'
-
-const TRACY_DETAILS =
-  '로렐 좌물쇠 잠금장치와 송아지 가죽 트림이 더해진 비세토스 모노그램 크로스바디 백\n\nMCM을 대표하며 오랜 시간 사랑받아온 Tracy 크로스바디 백이 더욱 부드러운 소재와 가죽 핸들로 새롭게 선보입니다. 아이코닉한 라우렐 잠금장치와 세 개의 내외부 수납공간이 우아함과 실용성을 더합니다.'
-
-export const MEMORIES = [
-  {
-    id: 'baby-hojers',
-    type: 'letter',
-    title: 'FROM. 아기호저들',
-    description: '도착한 OUR MCMORY가 있어요!\n잊기 전에 확인해보세요!',
-    unread: true,
-    senderName: '아기호저들',
-    recipientName: '김민지',
-    hasLetter: true,
-    gift: {
-      name: 'Tracy 비세토스 크로스바디',
-      price: 1490000,
-      details: TRACY_DETAILS,
-    },
-    letter: {
-      message:
-        '“그동안 늘 곁에서 힘이 되어줘서 고마웠어.\n이 가방처럼 우리의 시간도 오래오래 함께하길!”',
-      date: '2026.08.06',
-      withProduct: 'MCM 트레이시 비세토스 크로스바디와 함께',
-    },
-  },
-  {
-    id: 'visetos-wallet',
-    type: 'product',
-    title: '비세토스 카드지갑',
-    description:
-      '해당 제품을 선물 받은 지 1년이 지났어요! 추억을 다시 한 번 확인해보세요!',
-    unread: true,
-    senderName: '아기호저들',
-    recipientName: '김민지',
-    hasLetter: false,
-    gift: {
-      name: '비세토스 오리지널 카드 반지갑',
-      price: 490000,
-      details:
-        '가볍고 실용적인 카드 수납이 돋보이는 비세토스 오리지널 카드 반지갑\n\n매일 꺼내 쓰는 작은 물건에도 MCM의 아이코닉한 패턴과 마감이 담겨 있어, 선물받은 순간을 오래 기억하게 해줍니다.',
-    },
-  },
-  {
-    id: 'likelion',
-    type: 'letter',
-    title: 'FROM. 멋쟁이사자처럼',
-    description: '확인한 추억이에요',
-    unread: false,
-    senderName: '멋쟁이사자처럼',
-    recipientName: '김민지',
-    hasLetter: true,
-    gift: {
-      name: 'Tracy 비세토스 크로스바디',
-      price: 1490000,
-      details: TRACY_DETAILS,
-    },
-    letter: {
-      message:
-        '“함께한 시간이 늘 특별했어.\n이 선물처럼 우리의 추억도 오래오래 간직할게!”',
-      date: '2026.08.06',
-      withProduct: 'MCM 트레이시 비세토스 크로스바디와 함께',
-    },
-  },
-]
 
 function MemoriesPage() {
   const navigate = useNavigate()
-  const unreadCount = MEMORIES.filter((memory) => memory.unread).length
+  const [memories, setMemories] = useState([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function load() {
+      setIsLoading(true)
+      setErrorMessage('')
+      try {
+        const result = await getLetters()
+        if (cancelled) return
+        setMemories((result?.received ?? []).map(mapReceivedMemory))
+        setUnreadCount(result?.receivedUnopened ?? 0)
+      } catch (error) {
+        if (cancelled) return
+        if (isUnauthorized(error)) {
+          navigate('/login', { replace: true })
+          return
+        }
+        setErrorMessage(error.message ?? '추억을 불러오지 못했습니다.')
+      } finally {
+        if (!cancelled) setIsLoading(false)
+      }
+    }
+
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [navigate])
 
   return (
     <main className="relative mx-auto flex h-dvh w-full max-w-[412px] flex-col overflow-hidden bg-background">
@@ -81,16 +51,32 @@ function MemoriesPage() {
             확인해보세요
           </p>
 
-          <ul className="mt-[35px] flex flex-col gap-5">
-            {MEMORIES.map((memory) => (
-              <li key={memory.id}>
-                <MemoryCard
-                  memory={memory}
-                  onSelect={() => navigate(`/memories/${memory.id}`)}
-                />
-              </li>
-            ))}
-          </ul>
+          {errorMessage ? (
+            <p role="alert" className="mt-[35px] text-[12px] font-medium text-[#9E2A2B]">
+              {errorMessage}
+            </p>
+          ) : isLoading ? (
+            <p className="mt-[35px] text-center text-[13px] font-medium text-[#947C50]">
+              불러오는 중...
+            </p>
+          ) : memories.length === 0 ? (
+            <p className="mt-[35px] text-center text-[13px] font-medium text-[#947C50]">
+              아직 도착한 추억이 없어요
+            </p>
+          ) : (
+            <ul className="mt-[35px] flex flex-col gap-5">
+              {memories.map((memory) => (
+                <li key={memory.id}>
+                  <MemoryCard
+                    memory={memory}
+                    onSelect={() =>
+                      navigate(`/memories/${memory.id}`, { state: { memory } })
+                    }
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 
