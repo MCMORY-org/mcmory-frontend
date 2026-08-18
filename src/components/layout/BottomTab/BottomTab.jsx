@@ -12,7 +12,7 @@ const TAB_ITEMS = [
   { id: 'letter', label: '편지지', icon: letterIcon, width: 20 },
   { id: 'memory', label: '추억', icon: memoryIcon, width: 18, path: '/memories' },
   { id: 'manage', label: '관리', icon: manageIcon, width: 20, path: '/owned' },
-  { id: 'my', label: '마이', icon: myIcon, width: 20, path: '/recommend/people' },
+  { id: 'my', label: '마이', icon: myIcon, width: 20, path: '/my' },
 ]
 
 function TabIcon({ icon, width }) {
