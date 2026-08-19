@@ -1,6 +1,6 @@
 import { apiRequest, withFallback } from '@/api/client.jsx'
 import { USE_FALLBACK } from '@/api/config.js'
-import { getFallbackAuthResult, getFallbackMe } from '@/api/dummyData.js'
+import { getFallbackAuthResult, getFallbackMe, updateFallbackMe } from '@/api/dummyData.js'
 
 export function login({ phone, password }) {
   return withFallback(
@@ -36,5 +36,18 @@ export function getMe() {
       return result
     },
     getFallbackMe,
+  )
+}
+
+export function updateMe({ name, phone }) {
+  return withFallback(
+    'PATCH /api/v1/auth/me',
+    () =>
+      apiRequest('/api/v1/auth/me', {
+        method: 'PATCH',
+        body: JSON.stringify({ name, phone }),
+      }),
+    () => updateFallbackMe({ name, phone }),
+    { allowUnauthorized: true, allowNotFound: true },
   )
 }

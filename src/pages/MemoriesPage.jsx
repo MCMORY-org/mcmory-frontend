@@ -95,7 +95,11 @@ function MemoryCard({ memory, onSelect }) {
       }`}
     >
       <div className="flex w-full items-center gap-[13px] pr-4">
-        <MemoryAvatar type={memory.type} />
+        <MemoryAvatar
+          type={memory.type}
+          imageUrl={memory.imageUrl}
+          productName={memory.productName}
+        />
 
         <div className="flex min-w-0 flex-1 flex-col items-start gap-[7px]">
           <h2 className="w-full text-h2 text-primary-dark-active">
@@ -117,7 +121,17 @@ function MemoryCard({ memory, onSelect }) {
   )
 }
 
-function MemoryAvatar({ type }) {
+function MemoryAvatar({ type, imageUrl, productName }) {
+  if (imageUrl) {
+    return (
+      <img
+        src={imageUrl}
+        alt={productName ?? ''}
+        className="size-[52px] shrink-0 rounded-[10px] object-cover"
+      />
+    )
+  }
+
   if (type === 'product') {
     return (
       <span className="flex size-[52px] shrink-0 items-center justify-center rounded-full bg-secondary-light-active p-3">

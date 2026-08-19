@@ -256,42 +256,44 @@ function OwnedProductCard({ product, onSelect, onDelete }) {
 function DeleteConfirmDialog({ productName, isDeleting, onConfirm, onCancel }) {
   return (
     <div
-      className="absolute inset-0 z-20 flex items-center justify-center bg-[rgba(69,58,37,0.25)] px-[30px]"
+      className="fixed inset-0 z-50 flex justify-center bg-[rgba(69,58,37,0.25)]"
       onClick={onCancel}
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="delete-confirm-title"
-        onClick={(event) => event.stopPropagation()}
-        className="flex w-full max-w-[351px] flex-col items-center rounded-[10px] bg-[#FAF9F6] px-6 py-[21px] shadow-[2px_4px_5px_rgba(138,90,60,0.25)]"
-      >
-        <p
-          id="delete-confirm-title"
-          className="w-[154px] text-center text-[16px] font-normal break-words text-[#3E281B]"
+      <div className="flex h-full w-full max-w-[412px] items-center justify-center px-[30px]">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-confirm-title"
+          onClick={(event) => event.stopPropagation()}
+          className="flex w-full max-w-[351px] flex-col items-center rounded-[10px] bg-[#FAF9F6] px-6 py-[21px] shadow-[2px_4px_5px_rgba(138,90,60,0.25)]"
         >
-          ‘{productName}’ 을
-          <br />
-          정말 삭제하시겠습니까?
-        </p>
+          <p
+            id="delete-confirm-title"
+            className="w-[154px] text-center text-[16px] font-normal break-words text-[#3E281B]"
+          >
+            ‘{productName}’ 을
+            <br />
+            정말 삭제하시겠습니까?
+          </p>
 
-        <div className="mt-[11px] flex items-center gap-[9px]">
-          <button
-            type="button"
-            disabled={isDeleting}
-            onClick={onConfirm}
-            className="flex h-[22px] w-[33px] items-center justify-center rounded-[5px] bg-[#9E2A2B] px-2.5 text-[13px] font-medium text-[#F9F6F0] disabled:opacity-40"
-          >
-            예
-          </button>
-          <button
-            type="button"
-            disabled={isDeleting}
-            onClick={onCancel}
-            className="flex h-[22px] w-[59px] items-center justify-center rounded-[5px] bg-white px-2.5 text-[13px] font-medium text-[#3E281B] outline outline-[0.5px] -outline-offset-[0.5px] outline-[#C5A56A] disabled:opacity-40"
-          >
-            아니요
-          </button>
+          <div className="mt-[11px] flex items-center gap-[9px]">
+            <button
+              type="button"
+              disabled={isDeleting}
+              onClick={onConfirm}
+              className="flex h-[22px] w-[33px] items-center justify-center rounded-[5px] bg-[#9E2A2B] px-2.5 text-[13px] font-medium text-[#F9F6F0] disabled:opacity-40"
+            >
+              예
+            </button>
+            <button
+              type="button"
+              disabled={isDeleting}
+              onClick={onCancel}
+              className="flex h-[22px] w-[59px] items-center justify-center rounded-[5px] bg-white px-2.5 text-[13px] font-medium text-[#3E281B] outline outline-[0.5px] -outline-offset-[0.5px] outline-[#C5A56A] disabled:opacity-40"
+            >
+              아니요
+            </button>
+          </div>
         </div>
       </div>
     </div>

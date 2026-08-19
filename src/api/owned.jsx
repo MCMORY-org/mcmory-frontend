@@ -65,7 +65,7 @@ export function getOwnedStyling(id, { aiReason = false } = {}) {
     `GET /api/v1/owned/${id}/styling`,
     () => apiRequest(`/api/v1/owned/${id}/styling${query}`),
     getFallbackStyling,
-    { allowUnauthorized: true, useIfEmpty: true },
+    { allowUnauthorized: true, allowNotFound: true, useIfEmpty: true },
   )
 }
 
@@ -74,6 +74,6 @@ export function getOwnedCareGuide(id) {
     `GET /api/v1/owned/${id}/care-guide`,
     () => apiRequest(`/api/v1/owned/${id}/care-guide`),
     getFallbackCareGuide,
-    { allowUnauthorized: true, useIfEmpty: true },
+    { allowUnauthorized: true, allowNotFound: true, useIfEmpty: true },
   )
 }

@@ -1,5 +1,12 @@
 import { apiRequest, withFallback } from '@/api/client.jsx'
-import { getFallbackLetters } from '@/api/dummyData.js'
+import {
+  getFallbackLetters,
+  getProductDetails,
+  LETTER_DUMMY_IMAGES,
+  markFallbackLetterOpened,
+} from '@/api/dummyData.js'
+
+const openedLetterIds = new Set()
 
 export function getLetters() {
   return withFallback('GET /api/v1/letters', () => apiRequest('/api/v1/letters'), getFallbackLetters, {
@@ -8,8 +15,30 @@ export function getLetters() {
   })
 }
 
+export function openLetter(id) {
+  openedLetterIds.add(String(id))
+  return withFallback(
+    `PATCH /api/v1/letters/${id}`,
+    () =>
+      apiRequest(`/api/v1/letters/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ opened: true }),
+      }),
+    () => markFallbackLetterOpened(id),
+    { allowUnauthorized: true, allowNotFound: true },
+  )
+}
+
 export function mapReceivedMemory(item) {
-  const unread = item.status === 'SENT' || item.openedAt == null
+  const locallyOpened = openedLetterIds.has(String(item.id))
+  const unread =
+    !locallyOpened && (item.status === 'SENT' || item.openedAt == null)
+  const details = getProductDetails({
+    productId: item.productId,
+    productName: item.productName,
+  })
+  const letterImages =
+    item.letterImages?.length > 0 ? item.letterImages : LETTER_DUMMY_IMAGES
 
   return {
     id: String(item.id),
@@ -24,6 +53,9 @@ export function mapReceivedMemory(item) {
     productId: item.productId,
     imageUrl: item.imageUrl ?? null,
     letterBody: item.letterBody ?? '',
+    letterImages,
+    price: details?.price ?? null,
+    productDetail: details?.detail ?? '',
     status: item.status,
     sentAt: item.sentAt,
     openedAt: item.openedAt,

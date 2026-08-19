@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import BottomTab from '@/components/layout/BottomTab'
+import tracyVisetos from '@/assets/images/tracy-visetos.png'
 
 const DEFAULT_GIFT = {
   id: 'tracy-crossbody',
   name: 'Tracy 비세토스 크로스바디',
   price: 1490000,
+  imageUrl: tracyVisetos,
 }
 
 const BACKGROUND_COLORS = [
@@ -90,7 +92,15 @@ function MemoryPage() {
             <div className="mt-[35px] flex flex-col gap-[35px]">
               <section className="flex w-full flex-col items-start gap-2.5 overflow-hidden rounded-[20px] bg-[#FAF9F6] px-[15px] py-[13px] shadow-[2px_4px_10px_rgba(138,90,60,0.25)]">
                 <div className="flex w-full items-center gap-[25px]">
-                  <span className="size-[55px] shrink-0 rounded-[10px] bg-[#EDE3D1] shadow-[2px_2px_4px_rgba(110,72,48,0.25)]" />
+                  {gift.imageUrl ? (
+                    <img
+                      src={gift.imageUrl}
+                      alt=""
+                      className="size-[55px] shrink-0 rounded-[10px] object-cover shadow-[2px_2px_4px_rgba(110,72,48,0.25)]"
+                    />
+                  ) : (
+                    <span className="size-[55px] shrink-0 rounded-[10px] bg-[#EDE3D1] shadow-[2px_2px_4px_rgba(110,72,48,0.25)]" />
+                  )}
 
                   <div className="flex min-w-0 w-[217px] flex-1 flex-col items-start gap-[3px]">
                     <p className="text-[13px] font-medium text-[#947C50]">

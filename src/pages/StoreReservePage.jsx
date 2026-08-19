@@ -102,7 +102,7 @@ function StoreReservePage() {
         if (!location.state?.product) {
           const foundProduct = (ownedResult?.list ?? [])
             .map(mapOwnedProduct)
-            .find((item) => item.id === ownedId)
+            .find((item) => String(item.id) === String(ownedId))
           if (!foundProduct) {
             setNotFound(true)
             return

@@ -78,14 +78,49 @@ body::-webkit-scrollbar,
 }
 
 .store-map-pin {
+  overflow: visible !important;
   background: transparent !important;
   border: none !important;
   cursor: pointer;
   pointer-events: auto !important;
 }
 
-.store-map-pin svg {
-  pointer-events: none;
+.store-map-pin-inner {
+  position: relative;
+  width: 32px;
+  height: 40px;
+}
+
+.store-map-pin-number {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #f9f6f0;
+  border-radius: 50%;
+  background: #6e4830;
+  color: #f9f6f0 !important;
+  font-family: inherit;
+  font-size: 14px !important;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 35%);
+}
+
+.store-map-pin-inner::after {
+  position: absolute;
+  bottom: 2px;
+  left: 11px;
+  width: 10px;
+  height: 10px;
+  background: #6e4830;
+  content: '';
+  transform: rotate(45deg);
 }
 
 .store-map .leaflet-control-zoom {
@@ -109,29 +144,6 @@ body::-webkit-scrollbar,
   color: #555;
   font-size: 9px;
   line-height: 1.2;
-}
-
-.store-map-pin-inner {
-  position: relative;
-  display: flex;
-  width: 36px;
-  height: 44px;
-  align-items: flex-end;
-  justify-content: center;
-  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 30%));
-}
-
-.store-map-pin-inner span {
-  position: absolute;
-  top: 8px;
-  right: 0;
-  left: 0;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1;
-  text-align: center;
-  pointer-events: none;
 }
 
 button:disabled {

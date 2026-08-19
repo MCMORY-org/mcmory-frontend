@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom'
 
 import BottomTab from '@/components/layout/BottomTab'
 import tracyVisetos from '@/assets/images/tracy-visetos.png'
+import visetosShoulder from '@/assets/images/visetos-shoulder.png'
+import visetosWallet from '@/assets/images/visetos-wallet.png'
 
 const PRODUCTS = [
   {
@@ -17,14 +19,14 @@ const PRODUCTS = [
     name: '비세토스 숄더백',
     description: '실용적인 선물을 선호할 때 추천드리는 데일리 아이템',
     price: 1090000,
-    imageUrl: tracyVisetos,
+    imageUrl: visetosShoulder,
   },
   {
     id: 'visetos-wallet',
     name: '비세토스 오리지널 카드 반지갑',
     description: '가벼운 선물이 필요할 때 좋은 합리적인 선택',
     price: 490000,
-    imageUrl: tracyVisetos,
+    imageUrl: visetosWallet,
   },
 ]
 

@@ -34,7 +34,7 @@ function OwnedDetailPage() {
         if (cancelled) return
         const found = (result?.list ?? [])
           .map(mapOwnedProduct)
-          .find((item) => item.id === ownedId)
+          .find((item) => String(item.id) === String(ownedId))
         if (!found) {
           setNotFound(true)
           return
@@ -78,10 +78,6 @@ function OwnedDetailPage() {
           navigate('/login', { replace: true })
           return
         }
-        if (error.code === 'OWNED404_2') {
-          setNotFound(true)
-          return
-        }
         setErrorMessage(error.message ?? '스타일링 추천을 불러오지 못했습니다.')
       } finally {
         if (!cancelled) setIsLoadingStyling(false)
@@ -110,10 +106,6 @@ function OwnedDetailPage() {
         if (cancelled) return
         if (isUnauthorized(error)) {
           navigate('/login', { replace: true })
-          return
-        }
-        if (error.code === 'OWNED404_2') {
-          setNotFound(true)
           return
         }
         setErrorMessage(error.message ?? '관리 방법을 불러오지 못했습니다.')

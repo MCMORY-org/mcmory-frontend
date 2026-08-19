@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
+import { updateMe } from '@/api/auth.jsx'
 import { isUnauthorized } from '@/api/client.jsx'
 import { createFriend, getFriendInitial, updateFriend } from '@/api/friends.jsx'
 import BottomTab from '@/components/layout/BottomTab'
@@ -23,11 +24,18 @@ function AddPersonPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const friend = location.state?.friend
-  const slotName = location.state?.slotName || friend?.name || '친구'
-  const isEdit = Boolean(friend?.id)
+  const isMe = Boolean(location.state?.isMe)
+  const member = location.state?.member
+  const slotName = location.state?.slotName || friend?.name || (isMe ? '나' : '친구')
+  const isFriendEdit = Boolean(friend?.id)
+  const isEdit = isFriendEdit || isMe
 
-  const [name, setName] = useState(isEdit ? friend.name ?? '' : '')
-  const [phone, setPhone] = useState(isEdit ? formatKoreanPhone(friend.phone ?? '') : '')
+  const [name, setName] = useState(
+    isMe ? member?.name ?? '' : isFriendEdit ? friend.name ?? '' : '',
+  )
+  const [phone, setPhone] = useState(
+    formatKoreanPhone(isMe ? member?.phone ?? '' : isFriendEdit ? friend.phone ?? '' : ''),
+  )
   const [agreed, setAgreed] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState({ name: '', phone: '', agreed: '', submit: '' })
@@ -56,7 +64,9 @@ function AddPersonPage() {
 
     setIsSubmitting(true)
     try {
-      if (isEdit) {
+      if (isMe) {
+        await updateMe({ name: trimmedName, phone: formattedPhone })
+      } else if (isFriendEdit) {
         await updateFriend(friend.id, { name: trimmedName, phone: formattedPhone })
       } else {
         await createFriend({ name: trimmedName, phone: formattedPhone })
@@ -71,7 +81,11 @@ function AddPersonPage() {
         ...current,
         submit:
           error.message ??
-          (isEdit ? '친구 정보를 수정하지 못했습니다.' : '친구를 등록하지 못했습니다.'),
+          (isMe
+            ? '내 정보를 수정하지 못했습니다.'
+            : isFriendEdit
+              ? '친구 정보를 수정하지 못했습니다.'
+              : '친구를 등록하지 못했습니다.'),
       }))
     } finally {
       setIsSubmitting(false)
@@ -96,16 +110,28 @@ function AddPersonPage() {
             </button>
 
             <p className="mt-[13px] text-[13px] font-semibold text-primary-active">
-              {displayName}의 연락처를 {isEdit ? '수정' : '등록'}해주세요
+              {isMe
+                ? '내 개인정보를 수정해주세요'
+                : `${displayName}의 연락처를 ${isEdit ? '수정' : '등록'}해주세요`}
             </p>
 
-            <h1 className="mt-[36px] text-h1 text-primary-dark-active">PEOPLE</h1>
+            <h1 className="mt-[36px] text-h1 text-primary-dark-active">
+              {isMe ? 'PROFILE' : 'PEOPLE'}
+            </h1>
 
             <div className="mt-[37px] flex w-full items-center gap-[15px]">
-              <span className="flex size-[47px] shrink-0 items-center justify-center rounded-full border-[0.5px] border-[#C5A56A] bg-[#FAF9F6] text-[18px] font-semibold text-[#3E281B]">
-                {getFriendInitial(displayName)}
+              <span
+                className={`flex size-[47px] shrink-0 items-center justify-center rounded-full text-[18px] font-semibold text-[#3E281B] ${
+                  isMe
+                    ? 'bg-[#C5A56A]'
+                    : 'border-[0.5px] border-[#C5A56A] bg-[#FAF9F6]'
+                }`}
+              >
+                {isMe ? '나' : getFriendInitial(displayName)}
               </span>
-              <p className="text-[18px] font-semibold text-[#3E281B]">{displayName}</p>
+              <p className="text-[18px] font-semibold text-[#3E281B]">
+                {isMe ? `나 (${displayName})` : displayName}
+              </p>
             </div>
 
             <div className="mt-[22px] flex w-full flex-col gap-1.5">
@@ -159,9 +185,19 @@ function AddPersonPage() {
             <div className="mt-[15px] flex w-full items-center gap-2.5 rounded-[5px] bg-[#FFEAEC] px-2.5 py-[7px]">
               <BannerIcon />
               <p className="text-[14px] font-normal text-[#9E2A2B]">
-                선물 전달의 오류를 방지하기 위해 등록하시려는 분의
-                <br />
-                성함과 전화번호를 다시 한 번 확인해주세요.
+                {isMe ? (
+                  <>
+                    본명과 전화번호가 잘 입력되었는지
+                    <br />
+                    다시 한 번 확인해주세요.
+                  </>
+                ) : (
+                  <>
+                    선물 전달의 오류를 방지하기 위해 등록하시려는 분의
+                    <br />
+                    성함과 전화번호를 다시 한 번 확인해주세요.
+                  </>
+                )}
               </p>
             </div>
           </div>

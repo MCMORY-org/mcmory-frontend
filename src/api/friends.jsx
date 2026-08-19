@@ -42,15 +42,17 @@ export function updateFriend(id, { name, phone }) {
 }
 
 export function deleteFriend(id) {
+  const friendId = Number(id)
+
   return withFallback(
     'DELETE /api/v1/friends',
     () =>
       apiRequest('/api/v1/friends', {
         method: 'DELETE',
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ id: Number.isFinite(friendId) ? friendId : id }),
       }),
     () => removeFallbackFriend(id),
-    { allowUnauthorized: true },
+    { allowUnauthorized: true, allowNotFound: true },
   )
 }
 

@@ -3,15 +3,56 @@
  * 목록·문구·매장 정보는 아래 상수만 수정하면 됩니다.
  */
 import { ApiError } from '@/api/client.jsx'
+import arenCardCase from '@/assets/images/aren-card-case.png'
+import letterBirthday1 from '@/assets/images/letter-birthday-1.png'
+import letterBirthday2 from '@/assets/images/letter-birthday-2.png'
+import lurexDenimPants from '@/assets/images/lurex-denim-pants.png'
 import tracyVisetos from '@/assets/images/tracy-visetos.png'
+import visetosShoulder from '@/assets/images/visetos-shoulder.png'
+import visetosWallet from '@/assets/images/visetos-wallet.png'
+import washedDenimJacket from '@/assets/images/washed-denim-jacket.png'
 
 const IMG = {
   tracy: tracyVisetos,
-  shoulder: tracyVisetos,
-  wallet: tracyVisetos,
-  card: tracyVisetos,
-  jacket: tracyVisetos,
-  pants: tracyVisetos,
+  shoulder: visetosShoulder,
+  wallet: visetosWallet,
+  card: arenCardCase,
+  jacket: washedDenimJacket,
+  pants: lurexDenimPants,
+}
+
+export const LETTER_DUMMY_IMAGES = [letterBirthday1, letterBirthday2]
+
+export const DUMMY_PRODUCT_DETAILS = {
+  101: {
+    name: 'Tracy 비세토스 크로스바디',
+    price: 1490000,
+    detail:
+      '로렐 좌물쇠 잠금장치와 송아지 가죽 트림이 더해진 비세토스 모노그램 크로스바디 백\n\nMCM을 대표하며 오랜 시간 사랑받아온 Tracy 크로스바디 백이 더욱 부드러운 소재와 가죽 핸들로 새롭게 선보입니다. 아이코닉한 라우렐 잠금장치와 세 개의 내외부 수납공간이 우아함과 실용성을 더합니다.',
+  },
+  102: {
+    name: '비세토스 숄더백',
+    price: 1090000,
+    detail:
+      '비세토스 모노그램이 돋보이는 데일리 숄더백입니다.\n\n넉넉한 수납과 가벼운 무게로 일상과 여행 모두에 잘 어울립니다. 골드 톤 하드웨어와 가죽 스트랩이 클래식한 실루엣을 완성합니다.',
+  },
+  103: {
+    name: '비세토스 오리지널 카드 반지갑',
+    price: 490000,
+    detail:
+      '비세토스 오리지널 패턴의 카드 반지갑입니다.\n\n슬림한 실루엣에 카드 슬롯과 지폐 수납을 담아, 매일 들고 다니기 좋은 실용적인 선물입니다.',
+  },
+}
+
+export function getProductDetails({ productId, productName } = {}) {
+  if (productId && DUMMY_PRODUCT_DETAILS[productId]) {
+    return DUMMY_PRODUCT_DETAILS[productId]
+  }
+
+  return (
+    Object.values(DUMMY_PRODUCT_DETAILS).find((item) => item.name === productName) ??
+    null
+  )
 }
 
 export const DUMMY_SERIAL_PRODUCTS = {
@@ -65,10 +106,11 @@ export const DUMMY_LETTERS = {
       productName: 'Tracy 비세토스 크로스바디',
       productId: 101,
       imageUrl: IMG.tracy,
+      letterImages: LETTER_DUMMY_IMAGES,
       letterBody:
-        '생일 축하해! 네가 오래 쓸 수 있는 가방으로 골랐어. 함께한 순간들이 더 특별해지길 바라.',
+        '그동안 늘 곁에서 힘이 되어줘서 고마웠어.\n이 가방처럼 우리의 시간도 오래오래 함께하길!',
       status: 'SENT',
-      sentAt: '2026-08-12T00:00:00',
+      sentAt: '2026-08-06T00:00:00',
       openedAt: null,
     },
     {
@@ -77,6 +119,7 @@ export const DUMMY_LETTERS = {
       productName: '비세토스 오리지널 카드 반지갑',
       productId: 103,
       imageUrl: IMG.wallet,
+      letterImages: LETTER_DUMMY_IMAGES,
       letterBody: '승진 정말 축하해. 작은 선물이지만 매일 들고 다니며 응원하고 싶어.',
       status: 'SENT',
       sentAt: '2026-08-08T00:00:00',
@@ -88,6 +131,7 @@ export const DUMMY_LETTERS = {
       productName: '비세토스 숄더백',
       productId: 102,
       imageUrl: IMG.shoulder,
+      letterImages: LETTER_DUMMY_IMAGES,
       letterBody: '졸업 축하해! 새로운 시작에 잘 어울릴 것 같아서 골랐어. 늘 응원할게.',
       status: 'OPENED',
       sentAt: '2026-07-21T00:00:00',
@@ -99,6 +143,7 @@ export const DUMMY_LETTERS = {
       productName: 'Tracy 비세토스 크로스바디',
       productId: 101,
       imageUrl: IMG.tracy,
+      letterImages: LETTER_DUMMY_IMAGES,
       letterBody: '프로젝트 끝까지 고생했어. 우리의 추억을 이 선물에 담아 보낼게.',
       status: 'OPENED',
       sentAt: '2026-06-30T00:00:00',
@@ -224,8 +269,8 @@ export const DUMMY_FRIENDS = [
   {
     id: 1,
     name: '민지',
-    phone: '01012345678',
-    tasteSummary: '미니멀 · 데일리',
+    phone: '01055556666',
+    tasteSummary: '미니멀 · 클래식',
   },
   {
     id: 2,
@@ -236,7 +281,7 @@ export const DUMMY_FRIENDS = [
   {
     id: 3,
     name: '서연',
-    phone: '01055556666',
+    phone: '01077778888',
     tasteSummary: '캐주얼 · 데님',
   },
 ]
@@ -295,11 +340,38 @@ export function removeFallbackOwned(id) {
   return { id }
 }
 
-export function getFallbackLetters() {
+function cloneLetter(item) {
   return {
-    receivedUnopened: DUMMY_LETTERS.receivedUnopened,
-    received: DUMMY_LETTERS.received.map((item) => ({ ...item })),
+    ...item,
+    letterImages: [...(item.letterImages ?? [])],
   }
+}
+
+let fallbackLetters = DUMMY_LETTERS.received.map(cloneLetter)
+
+function isLetterUnread(item) {
+  return item.status === 'SENT' || item.openedAt == null
+}
+
+export function getFallbackLetters() {
+  const received = fallbackLetters.map(cloneLetter)
+  return {
+    receivedUnopened: received.filter(isLetterUnread).length,
+    received,
+  }
+}
+
+export function markFallbackLetterOpened(id) {
+  fallbackLetters = fallbackLetters.map((item) =>
+    String(item.id) === String(id)
+      ? {
+          ...item,
+          status: 'OPENED',
+          openedAt: item.openedAt ?? new Date().toISOString(),
+        }
+      : item,
+  )
+  return getFallbackLetters()
 }
 
 export function getFallbackStyling() {
@@ -377,13 +449,29 @@ export function getFallbackAuthResult(payload = {}) {
   }
 }
 
+let fallbackMember = {
+  id: 1,
+  name: DUMMY_USER.name,
+  phone: DUMMY_USER.phone,
+}
+
 export function getFallbackMe() {
   return {
-    member: {
-      id: 1,
-      name: DUMMY_USER.name,
-    },
+    member: { ...fallbackMember },
   }
+}
+
+export function updateFallbackMe({ name, phone }) {
+  const trimmedName = String(name ?? '').trim()
+  const digits = String(phone ?? '').replace(/\D/g, '')
+
+  fallbackMember = {
+    ...fallbackMember,
+    name: trimmedName || fallbackMember.name,
+    phone: digits || fallbackMember.phone,
+  }
+
+  return { member: { ...fallbackMember } }
 }
 
 function cloneFriends(list) {
@@ -443,7 +531,7 @@ export function addFallbackFriend({ name, phone }) {
 export function updateFallbackFriend(id, { name, phone }) {
   const trimmedName = String(name ?? '').trim()
   const digits = normalizePhoneDigits(phone)
-  const target = fallbackFriends.find((item) => item.id === id)
+  const target = fallbackFriends.find((item) => String(item.id) === String(id))
 
   if (!target) {
     throw new ApiError({
@@ -478,7 +566,7 @@ export function updateFallbackFriend(id, { name, phone }) {
   }
 
   fallbackFriends = fallbackFriends.map((item) =>
-    item.id === id ? { ...item, name: trimmedName } : item,
+    String(item.id) === String(id) ? { ...item, name: trimmedName } : item,
   )
 
   return {
@@ -492,7 +580,7 @@ export function updateFallbackFriend(id, { name, phone }) {
 }
 
 export function removeFallbackFriend(id) {
-  const target = fallbackFriends.find((item) => item.id === id)
+  const target = fallbackFriends.find((item) => String(item.id) === String(id))
 
   if (!target) {
     throw new ApiError({
@@ -502,6 +590,6 @@ export function removeFallbackFriend(id) {
     })
   }
 
-  fallbackFriends = fallbackFriends.filter((item) => item.id !== id)
+  fallbackFriends = fallbackFriends.filter((item) => String(item.id) !== String(id))
   return { ok: true }
 }

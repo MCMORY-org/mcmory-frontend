@@ -63,7 +63,7 @@ function OwnedStoresPage() {
         if (cancelled) return
         const found = (result?.list ?? [])
           .map(mapOwnedProduct)
-          .find((item) => item.id === ownedId)
+          .find((item) => String(item.id) === String(ownedId))
         if (!found) {
           setNotFound(true)
           return
@@ -136,15 +136,15 @@ function OwnedStoresPage() {
   return (
     <main className="relative mx-auto flex h-dvh w-full max-w-[412px] flex-col overflow-hidden bg-background">
       <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
-        <div className="no-scrollbar absolute inset-0 overflow-y-auto px-4 pt-9 pb-8">
-          <div className="flex h-[35px] items-center">
+        <div className="no-scrollbar absolute inset-0 overflow-y-auto px-[30px] pt-9 pb-8">
+          <div className="flex items-start gap-3">
             <button
               type="button"
               aria-label="뒤로 가기"
               onClick={() =>
                 navigate(`/owned/${ownedId}`, { state: { product } })
               }
-              className="flex size-8 items-center justify-center bg-transparent"
+              className="mt-[2px] flex h-[22px] w-[18px] shrink-0 items-center justify-start bg-transparent"
             >
               <svg
                 viewBox="0 0 10 18"
@@ -161,9 +161,16 @@ function OwnedStoresPage() {
                 />
               </svg>
             </button>
+
+            <p className="min-w-0 flex-1 text-[16px] leading-[1.4] font-semibold break-keep">
+              <span className="text-[#3E281B]">{product?.name ?? '이 제품'}</span>
+              <span className="text-[#947C50]"> 수리가 가능한</span>
+              <br />
+              <span className="text-[#947C50]">매장만 모아서 보여드려요</span>
+            </p>
           </div>
 
-          <div className="flex flex-col gap-5">
+          <div className="mt-5 flex flex-col gap-5">
             <StoreMap stores={stores} onStoreClick={handleStoreSelect} />
 
             <div className="flex flex-wrap items-start gap-2.5">
@@ -214,16 +221,6 @@ function OwnedStoresPage() {
                 ))}
               </ul>
             )}
-
-            <p className="text-[16px] leading-[1.4] font-semibold break-keep">
-              <span className="text-[#3E281B]">{product?.name ?? '이 제품'}</span>
-              <span className="text-[#947C50]">
-                {' '}
-                수리가 가능한
-                <br />
-                매장만 모아서 보여드려요
-              </span>
-            </p>
           </div>
         </div>
       </div>
@@ -300,14 +297,10 @@ function StoreMap({ stores, onStoreClick }) {
         riseOnHover: true,
         icon: L.divIcon({
           className: 'store-map-pin',
-          iconSize: [36, 44],
-          iconAnchor: [18, 44],
-          html: `<div class="store-map-pin-inner">
-            <svg viewBox="0 0 28 36" width="28" height="36" aria-hidden="true">
-              <path d="M14 0C6.268 0 0 6.13 0 13.68C0 23.63 14 36 14 36S28 23.63 28 13.68C28 6.13 21.732 0 14 0Z" fill="#6E4830"></path>
-              <circle cx="14" cy="13.5" r="7.5" fill="#8A5A3C"></circle>
-            </svg>
-            <span>${index + 1}</span>
+          iconSize: [32, 40],
+          iconAnchor: [16, 40],
+          html: `<div class="store-map-pin-inner" style="position:relative;width:32px;height:40px">
+            <strong class="store-map-pin-number" style="position:absolute;top:0;left:0;z-index:2;display:flex;width:32px;height:32px;align-items:center;justify-content:center;border:2px solid #F9F6F0;border-radius:50%;background:#6E4830;color:#F9F6F0;font-size:14px;font-weight:700;line-height:1;box-shadow:0 2px 4px rgba(0,0,0,.35)">${index + 1}</strong>
           </div>`,
         }),
         title: store.name,
