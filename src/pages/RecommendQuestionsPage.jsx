@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom'
 
 import BottomTab from '@/components/layout/BottomTab'
 import ToggleSwitch from '@/components/ui/ToggleSwitch'
+import BackpackIcon from '@/assets/icons/home/Backpack.svg'
+import CrossbodyIcon from '@/assets/icons/home/Crossbody.svg'
+import ShoulderIcon from '@/assets/icons/home/Shoulderbag.svg'
+import ToteIcon from '@/assets/icons/home/Totebag.svg'
 
 const COLORS = [
   { id: 'cognac', label: '코냑', color: '#8A5A3C' },
@@ -272,8 +276,6 @@ function RecommendQuestionsPage() {
                   <div className="grid grid-cols-2 gap-x-[18px] gap-y-[9px]">
                     {BAGS.map((bag) => {
                       const selected = selectedBags.includes(bag.id)
-                      const Icon = bag.icon
-
                       return (
                         <button
                           key={bag.id}
@@ -286,7 +288,7 @@ function RecommendQuestionsPage() {
                           }`}
                         >
                           <span className="flex flex-col items-center gap-2">
-                            <Icon />
+                            <img src={bag.icon} alt="" aria-hidden="true" />
                             <span className="text-[13px] font-medium text-[#3E281B]">
                               {bag.label}
                             </span>
@@ -578,80 +580,6 @@ function SearchIcon() {
         strokeWidth="1.4"
         strokeLinecap="round"
       />
-    </svg>
-  )
-}
-
-function ShoulderIcon() {
-  return (
-    <svg viewBox="0 0 32 32" className="size-8" fill="none" aria-hidden>
-      <path
-        d="M11 4.5c0 4.2 1.6 8 5 10.5 3.4-2.5 5-6.3 5-10.5"
-        stroke="#8A5A3C"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M9.5 16.5h13v11.5H9.5z"
-        stroke="#8A5A3C"
-        strokeWidth="1.5"
-      />
-    </svg>
-  )
-}
-
-function ToteIcon() {
-  return (
-    <svg viewBox="0 0 33 33" className="size-[33px]" fill="none" aria-hidden>
-      <path
-        d="M8 12h17l-1.8 16H9.8L8 12Z"
-        stroke="#8A5A3C"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M13 12V9.5a3.5 3.5 0 0 1 7 0V12"
-        stroke="#8A5A3C"
-        strokeWidth="1.5"
-      />
-    </svg>
-  )
-}
-
-function CrossbodyIcon() {
-  return (
-    <svg viewBox="0 0 32 32" className="size-8" fill="none" aria-hidden>
-      <path
-        d="M12 3.5c2.4 6.2 5.2 10.4 8 13"
-        stroke="#8A5A3C"
-        strokeWidth="1.5"
-      />
-      <rect
-        x="9.5"
-        y="13.5"
-        width="13"
-        height="15"
-        rx="1.5"
-        stroke="#8A5A3C"
-        strokeWidth="1.5"
-      />
-    </svg>
-  )
-}
-
-function BackpackIcon() {
-  return (
-    <svg viewBox="0 0 33 33" className="size-[33px]" fill="none" aria-hidden>
-      <path
-        d="M11 12.5h11v16H11z"
-        stroke="#8A5A3C"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M13.5 12.5v-2a3 3 0 0 1 6 0v2"
-        stroke="#8A5A3C"
-        strokeWidth="1.5"
-      />
-      <path d="M14 19h5" stroke="#8A5A3C" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   )
 }
