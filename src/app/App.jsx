@@ -46,7 +46,7 @@ function App() {
       <Route path="/memory" element={<MemoryPage />} />
       <Route path="/memory/sent" element={<InviteSentPage />} />
       <Route path="/s/:token" element={<TasteChecklistPage />} />
-      <Route path="/i/:token" element={<InvitePage />} />
+      <Route path="/g/:token" element={<InvitePage />} />
       <Route path="/taste" element={<Navigate to="/s/demo" replace />} />
       <Route path="/my" element={<MyPage />} />
       <Route path="/my/add" element={<AddPersonPage />} />

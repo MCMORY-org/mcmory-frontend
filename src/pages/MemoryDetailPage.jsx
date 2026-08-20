@@ -57,7 +57,8 @@ function MemoryDetailPage() {
           letterImages: detail?.letterImageUrls ?? [],
           letterColor: detail?.letterColor ?? null,
           price: detail?.product?.price ?? null,
-          needConsent: detail?.needConsent ?? false,
+          // 상세를 못 받았으면 동의 여부를 모름. 모르는 것을 "동의 끝남"으로 읽으면 빈 편지를 진짜처럼 염
+          needConsent: detail == null ? true : detail.needConsent,
         })
         setRecipientName(me?.member?.name || DUMMY_USER.name)
 

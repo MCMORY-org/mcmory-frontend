@@ -38,9 +38,9 @@ export function registerInvitationOwned(token) {
   return apiRequest(`/api/v1/invitations/${token}/owned`, { method: 'POST' })
 }
 
-/** 초대 링크 전체 주소. 문자로 보낼 값임. */
+/** 초대 링크 전체 주소. 문자로 보낼 값임. 웹 링크 경로는 `/g/{token}`이 계약임(명세서 0장) */
 export function buildInviteUrl(token) {
-  return `${window.location.origin}/i/${token}`
+  return `${window.location.origin}/g/${token}`
 }
 
 export function buildSurveyUrl(path) {

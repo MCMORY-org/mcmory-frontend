@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
+import { buildSurveyUrl } from '@/api/gift.jsx'
+
 import BottomTab from '@/components/layout/BottomTab'
 import tracyVisetos from '@/assets/images/tracy-visetos.png'
 import visetosShoulder from '@/assets/images/visetos-shoulder.png'
@@ -47,6 +49,17 @@ function GiftPage() {
   const [selectedId, setSelectedId] = useState(
     () => location.state?.selectedGiftId ?? '',
   )
+  const [copied, setCopied] = useState(false)
+
+  // 발송자가 받은 설문 링크임. 이걸 안 보여주면 수신자에게 보낼 방법이 없음
+  const surveyUrl = location.state?.surveyPath
+    ? buildSurveyUrl(location.state.surveyPath)
+    : ''
+
+  const handleCopySurvey = async () => {
+    await navigator.clipboard.writeText(surveyUrl)
+    setCopied(true)
+  }
 
   const handleSubmit = (event) => {
     event.preventDefault()
@@ -84,6 +97,24 @@ function GiftPage() {
               ? 'AI가 후보 안에서 3가지를 골라봤어요'
               : '입력하신 내용을 바탕으로 3가지를 골라봤어요'}
           </p>
+
+          {surveyUrl ? (
+            <div className="mt-[15px] flex w-full flex-col gap-2 rounded-[10px] bg-[#FAF9F6] px-3 py-2.5">
+              <p className="text-[12px] font-medium text-[#3E281B]">
+                받는 분께 취향 질문 링크를 보내주세요. 답이 오면 추천이 더 맞아져요
+              </p>
+              <p className="truncate text-[11px] font-medium text-[#947C50]">
+                {surveyUrl}
+              </p>
+              <button
+                type="button"
+                onClick={handleCopySurvey}
+                className="self-start rounded-[8px] bg-primary px-3 py-1.5 text-[12px] font-medium text-background"
+              >
+                {copied ? '복사했어요' : '질문 링크 복사'}
+              </button>
+            </div>
+          ) : null}
 
           <div className="min-h-[15px] flex-1" />
 

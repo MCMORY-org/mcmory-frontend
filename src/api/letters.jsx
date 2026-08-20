@@ -4,9 +4,9 @@ import { getFallbackLetters, markFallbackLetterOpened } from '@/api/dummyData.js
 const openedLetterIds = new Set()
 
 export function getLetters() {
+  // useIfEmpty를 켜지 않음 — 정상적으로 빈 편지함까지 더미로 덮으면 새 계정에 가짜 편지가 뜸
   return withFallback('GET /api/v1/letters', () => apiRequest('/api/v1/letters'), getFallbackLetters, {
     allowUnauthorized: true,
-    useIfEmpty: true,
   })
 }
 

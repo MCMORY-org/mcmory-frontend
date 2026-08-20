@@ -46,8 +46,10 @@ function MemoryPage() {
   }, [imageUrl])
 
   const handleChangeGift = () => {
+    // 추천 결과와 friendId를 함께 되돌려줌 — 잃으면 더미 상품으로 떨어져 발송이 GIFT400_1로 죽음
     navigate('/gift', {
       state: {
+        ...location.state,
         recipientName,
         selectedGiftId: gift.id,
       },
