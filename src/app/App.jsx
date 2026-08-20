@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import AddPersonPage from '@/pages/AddPersonPage.jsx'
 import ComponentTestPage from '@/pages/ComponentTestPage.jsx'
 import GiftPage from '@/pages/GiftPage.jsx'
+import InvitePage from '@/pages/InvitePage.jsx'
 import InviteSentPage from '@/pages/InviteSentPage.jsx'
 import LoadingPage from '@/pages/LoadingPage.jsx'
 import LoginPage from '@/pages/LoginPage.jsx'
@@ -18,6 +19,7 @@ import OwnedStoresPage from '@/pages/OwnedStoresPage.jsx'
 import StoreReservePage from '@/pages/StoreReservePage.jsx'
 import RecommendPage from '@/pages/RecommendPage.jsx'
 import RecommendQuestionsPage from '@/pages/RecommendQuestionsPage.jsx'
+import SentLettersPage from '@/pages/SentLettersPage.jsx'
 import SignupPage from '@/pages/SignupPage.jsx'
 import TasteChecklistPage from '@/pages/TasteChecklistPage.jsx'
 
@@ -45,6 +47,8 @@ function App() {
       <Route path="/memory" element={<MemoryPage />} />
       <Route path="/memory/sent" element={<InviteSentPage />} />
       <Route path="/s/:token" element={<TasteChecklistPage />} />
+      <Route path="/g/:token" element={<InvitePage />} />
+      <Route path="/letters" element={<SentLettersPage />} />
       <Route path="/taste" element={<Navigate to="/s/demo" replace />} />
       <Route path="/my" element={<MyPage />} />
       <Route path="/my/add" element={<AddPersonPage />} />

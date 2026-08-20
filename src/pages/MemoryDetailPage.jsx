@@ -3,8 +3,14 @@ import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import { getMe } from '@/api/auth.jsx'
 import { isUnauthorized } from '@/api/client.jsx'
-import { DUMMY_USER, LETTER_DUMMY_IMAGES } from '@/api/dummyData.js'
-import { getLetters, mapReceivedMemory, openLetter } from '@/api/letters.jsx'
+import { DUMMY_USER } from '@/api/dummyData.js'
+import { resolveLetterImageUrl } from '@/api/gift.jsx'
+import {
+  getLetters,
+  getReceivedLetter,
+  mapReceivedMemory,
+  openLetter,
+} from '@/api/letters.jsx'
 import { listOwned } from '@/api/owned.jsx'
 import chevronIcon from '@/assets/icons/common-components/Chevron.svg'
 import BottomTab from '@/components/layout/BottomTab'
@@ -28,10 +34,12 @@ function MemoryDetailPage() {
     async function load() {
       if (!location.state?.memory) setIsLoading(true)
       try {
-        const [letters, owned, me] = await Promise.all([
+        const [letters, owned, me, detail] = await Promise.all([
           getLetters(),
           listOwned().catch(() => ({ list: [] })),
           getMe().catch(() => null),
+          // 목록 응답에는 본문·사진·가격이 없어 상세 요청으로 가져옴. 동의 전에는 letterBody 키가 없음
+          getReceivedLetter(memoryId).catch(() => null),
         ])
         if (cancelled) return
 
@@ -44,13 +52,23 @@ function MemoryDetailPage() {
           return
         }
 
-        setMemory(found)
+        setMemory({
+          ...found,
+          letterBody: detail?.letterBody ?? '',
+          letterImages: (detail?.letterImageUrls ?? []).map(resolveLetterImageUrl),
+          letterColor: detail?.letterColor ?? null,
+          price: detail?.product?.price ?? null,
+          // 상세를 못 받았으면 동의 여부를 모름. 모르는 것을 "동의 끝남"으로 읽으면 빈 편지를 진짜처럼 염
+          needConsent: detail == null ? true : detail.needConsent,
+        })
         setRecipientName(me?.member?.name || DUMMY_USER.name)
 
         const matched = (owned?.list ?? []).find(
           (item) => item.product?.productId === found.productId,
         )
-        setImageUrl(found.imageUrl ?? matched?.product?.imageUrl ?? null)
+        setImageUrl(
+          detail?.product?.imageUrl ?? found.imageUrl ?? matched?.product?.imageUrl ?? null,
+        )
       } catch (error) {
         if (cancelled) return
         if (isUnauthorized(error)) {
@@ -122,19 +140,22 @@ function MemoryDetailPage() {
                 </div>
               </section>
 
-              <section className="flex w-full flex-col overflow-hidden rounded-[20px] bg-[#FAF9F6] px-[15px] py-[13px] shadow-[2px_4px_10px_rgba(138,90,60,0.25)]">
-                <div className="flex w-full flex-col items-start gap-[15px]">
-                  <h2 className="w-full text-[18px] font-semibold text-[#3E281B]">
-                    제품 상세정보
-                  </h2>
-                  <p className="w-full text-[12px] leading-[1.5] font-normal break-keep whitespace-pre-line text-[#947C50]">
-                    {memory?.productDetail || '제품 상세 정보를 불러오지 못했습니다.'}
-                  </p>
-                </div>
-              </section>
+              {memory?.productDetail ? (
+                <section className="flex w-full flex-col overflow-hidden rounded-[20px] bg-[#FAF9F6] px-[15px] py-[13px] shadow-[2px_4px_10px_rgba(138,90,60,0.25)]">
+                  <div className="flex w-full flex-col items-start gap-[15px]">
+                    <h2 className="w-full text-[18px] font-semibold text-[#3E281B]">
+                      제품 상세정보
+                    </h2>
+                    <p className="w-full text-[12px] leading-[1.5] font-normal break-keep whitespace-pre-line text-[#947C50]">
+                      {memory.productDetail}
+                    </p>
+                  </div>
+                </section>
+              ) : null}
 
               <button
                 type="button"
+                disabled={memory.needConsent}
                 onClick={() => {
                   setShowLetter(true)
                   if (memory.unread) {
@@ -157,14 +178,18 @@ function MemoryDetailPage() {
                 }`}
               >
                 <p className="text-[13px] font-medium text-[#3E281B]">
-                  편지도 함께 왔어요!
+                  {memory.needConsent
+                    ? '문자로 받은 초대 링크에서 동의하면 편지를 볼 수 있어요'
+                    : '편지도 함께 왔어요!'}
                 </p>
-                <span className="flex h-[14px] items-center gap-[3px]">
-                  <span className="text-[13px] leading-none font-medium text-[#947C50]">
-                    보러가기
+                {memory.needConsent ? null : (
+                  <span className="flex h-[14px] items-center gap-[3px]">
+                    <span className="text-[13px] leading-none font-medium text-[#947C50]">
+                      보러가기
+                    </span>
+                    <img src={chevronIcon} alt="" className="h-2.5 w-3" />
                   </span>
-                  <img src={chevronIcon} alt="" className="h-2.5 w-3" />
-                </span>
+                )}
               </button>
             </div>
           )}
@@ -192,8 +217,8 @@ function formatLetterDate(value) {
 }
 
 function LetterOverlay({ memory, recipientName, onClose }) {
-  const photos =
-    memory.letterImages?.length > 0 ? memory.letterImages : LETTER_DUMMY_IMAGES
+  // 사진이 없으면 자리를 비움. 더미로 메우면 무관한 사진이 남의 편지에 뜸
+  const photos = memory.letterImages ?? []
   const [photoIndex, setPhotoIndex] = useState(0)
   const currentPhoto = photos[photoIndex] ?? photos[0]
   const dateLabel = formatLetterDate(memory.sentAt)
@@ -241,9 +266,7 @@ function LetterOverlay({ memory, recipientName, onClose }) {
                     </span>
                   ) : null}
                 </button>
-              ) : (
-                <span className="h-[163px] w-[255px] bg-[#FAF9F6]" />
-              )}
+              ) : null}
 
               <p className="w-full text-center text-[14px] leading-[1.2] font-normal break-keep whitespace-pre-line text-[#3E281B]">
                 “{memory.letterBody}”

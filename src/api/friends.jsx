@@ -60,3 +60,35 @@ export function getFriendInitial(name) {
   const trimmed = String(name ?? '').trim()
   return trimmed ? trimmed[0] : '친'
 }
+
+/**
+ * 같은 친구에게 다시 요청해도 기존 설문 토큰은 유지됨.
+ * `colors`와 `styles`를 둘 다 끄면 `FRIEND400_4`임.
+ */
+export function issueSurvey(friendId, axes) {
+  return apiRequest(`/api/v1/friends/${friendId}/survey`, {
+    method: 'POST',
+    body: JSON.stringify({ axes }),
+  })
+}
+
+export async function ensureFriend({ name, phone }) {
+  const digits = String(phone).replace(/\D/g, '')
+
+  try {
+    const result = await apiRequest('/api/v1/friends', {
+      method: 'POST',
+      body: JSON.stringify({ name, phone: digits }),
+    })
+    return result.friend
+  } catch (error) {
+    if (error.code !== 'FRIEND409_1') throw error
+
+    const { list } = await apiRequest('/api/v1/friends')
+    const found = list.find(
+      (friend) => String(friend.phone).replace(/\D/g, '') === digits,
+    )
+    if (!found) throw error
+    return found
+  }
+}

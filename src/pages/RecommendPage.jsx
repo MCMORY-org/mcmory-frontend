@@ -25,7 +25,15 @@ function RecommendPage() {
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    navigate('/recommend/questions')
+
+    // 추천 API는 관계와 예산만 받음. 목적과 상황은 넘기지 않음
+    navigate('/recommend/questions', {
+      state: {
+        relation: relationship || '친구',  // 미선택 시 서버가 허용하는 중립값 '친구'를 씀
+        minBudget,
+        maxBudget,
+      },
+    })
   }
 
   return (

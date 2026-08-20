@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+
+import { ensureFriend, issueSurvey } from '@/api/friends.jsx'
+import { createRecommendation, mapRecommendedProduct } from '@/api/recommend.jsx'
 
 import BottomTab from '@/components/layout/BottomTab'
 import ToggleSwitch from '@/components/ui/ToggleSwitch'
@@ -70,6 +73,9 @@ function getPhoneError(phone) {
 
 function RecommendQuestionsPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [colorEnabled, setColorEnabled] = useState(false)
@@ -121,8 +127,9 @@ function RecommendQuestionsPage() {
     clearError('style')
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
+    if (submitting) return
 
     const nextErrors = {
       name: name.trim() ? '' : '받는 분의 이름을 입력해주세요',
@@ -139,9 +146,48 @@ function RecommendQuestionsPage() {
 
     if (Object.values(nextErrors).some(Boolean)) return
 
-    navigate('/gift', {
-      state: { recipientName: name.trim() },
-    })
+    // 선택값은 질문 활성화에만 쓰고 추천 점수에 반영하지 않음. 서버에는 켠 축만 보냄
+    const axes = [
+      colorEnabled ? 'colors' : null,
+      styleEnabled ? 'styles' : null,
+      bagEnabled ? 'bags' : null,
+    ].filter(Boolean)
+
+    if (!colorEnabled && !styleEnabled) {
+      setSubmitError('색상과 스타일 중 하나는 켜야 질문을 보낼 수 있어요')
+      return
+    }
+
+    setSubmitError('')
+    setSubmitting(true)
+
+    try {
+      const friend = await ensureFriend({ name: name.trim(), phone })
+      const survey = await issueSurvey(friend.id, axes)
+      const recommendation = await createRecommendation({
+        relation: location.state?.relation ?? '친구',
+        minBudget: location.state?.minBudget ?? 0,
+        maxBudget: location.state?.maxBudget ?? 200,
+        friendId: friend.id,
+        aiReason: true,
+      })
+
+      navigate('/gift', {
+        state: {
+          recipientName: friend.name,
+          friendId: friend.id,
+          surveyPath: survey.path,
+          recommendationId: recommendation.recommendationId,
+          reasonSource: recommendation.reasonSource,
+          products: recommendation.results.map(mapRecommendedProduct),
+        },
+      })
+    } catch (error) {
+      console.error('[RecommendQuestions] 제출 실패', error)
+      setSubmitError(error.message ?? '잠시 후 다시 시도해주세요')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const errorCount = Object.values(errors).filter(Boolean).length
@@ -396,12 +442,19 @@ function RecommendQuestionsPage() {
         </div>
 
         <div className="shrink-0 px-4 pb-3">
+          {submitError ? (
+            <p className="mb-2 text-[12px] font-normal text-[#9E2A2B]">
+              {submitError}
+            </p>
+          ) : null}
+
           <button
             type="submit"
-            className="flex w-full items-center justify-center gap-2.5 rounded-[10px] bg-primary px-5 py-2.5 text-button text-background"
+            disabled={submitting}
+            className="flex w-full items-center justify-center gap-2.5 rounded-[10px] bg-primary px-5 py-2.5 text-button text-background disabled:opacity-60"
           >
             <SearchIcon />
-            FIND MCMORY
+            {submitting ? '찾는 중...' : 'FIND MCMORY'}
           </button>
         </div>
       </form>
