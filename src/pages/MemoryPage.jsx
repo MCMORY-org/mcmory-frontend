@@ -1,17 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 
 import BottomTab from '@/components/layout/BottomTab'
 import { sendGift, uploadLetterImages } from '@/api/gift.jsx'
-import tracyVisetos from '@/assets/images/tracy-visetos.png'
-
-const DEFAULT_GIFT = {
-  id: 'tracy-crossbody',
-  name: 'Tracy 비세토스 크로스바디',
-  price: 1490000,
-  imageUrl: tracyVisetos,
-}
-
 const BACKGROUND_COLORS = [
   { id: 'gold', label: '골드', color: '#C5A56A' },
   { id: 'black', label: '블랙', color: '#000000' },
@@ -27,7 +18,7 @@ function MemoryPage() {
   const location = useLocation()
   const fileInputRef = useRef(null)
 
-  const gift = location.state?.gift ?? DEFAULT_GIFT
+  const gift = location.state?.gift
   const recipientName = location.state?.recipientName || '김민지'
   const senderName = location.state?.senderName || '아기호저들'
 
@@ -56,6 +47,10 @@ function MemoryPage() {
       },
     })
   }
+
+  // 상품 id가 숫자가 아니면 발송이 반드시 GIFT400_1로 죽음. 추천을 거치지 않은 진입을 여기서 막음
+  const productId = Number(gift?.id)
+  const canSend = Number.isInteger(productId) && productId > 0
 
   const handleImageChange = (event) => {
     const file = event.target.files?.[0]
@@ -124,6 +119,9 @@ function MemoryPage() {
       setSending(false)
     }
   }
+
+  // 훅을 모두 부른 뒤에 돌려보냄
+  if (!canSend) return <Navigate to="/home" replace />
 
   return (
     <main className="relative mx-auto flex h-dvh w-full max-w-[412px] flex-col overflow-hidden bg-background">
