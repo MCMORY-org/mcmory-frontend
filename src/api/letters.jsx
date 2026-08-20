@@ -1,10 +1,5 @@
 import { apiRequest, withFallback } from '@/api/client.jsx'
-import {
-  getFallbackLetters,
-  getProductDetails,
-  LETTER_DUMMY_IMAGES,
-  markFallbackLetterOpened,
-} from '@/api/dummyData.js'
+import { getFallbackLetters, markFallbackLetterOpened } from '@/api/dummyData.js'
 
 const openedLetterIds = new Set()
 
@@ -29,16 +24,19 @@ export function openLetter(id) {
   )
 }
 
+/**
+ * 받은 편지 상세임(API 명세서 5.4의 #37). 목록에는 본문도 초대 토큰도 없어 여기서만 가져올 수 있음.
+ * 동의 전에는 `needConsent: true`와 닉네임만 오고 `letterBody` 키 자체가 없음.
+ */
+export function getReceivedLetter(id) {
+  return apiRequest(`/api/v1/letters/${id}`)
+}
+
 export function mapReceivedMemory(item) {
   const locallyOpened = openedLetterIds.has(String(item.id))
   const unread =
     !locallyOpened && (item.status === 'SENT' || item.openedAt == null)
-  const details = getProductDetails({
-    productId: item.productId,
-    productName: item.productName,
-  })
-  const letterImages =
-    item.letterImages?.length > 0 ? item.letterImages : LETTER_DUMMY_IMAGES
+  // 본문·사진·가격은 목록에 없음. 상세(#37)에서 채움 — 더미로 메우면 남의 사진과 틀린 가격이 나감
 
   return {
     id: String(item.id),
@@ -53,9 +51,9 @@ export function mapReceivedMemory(item) {
     productId: item.productId,
     imageUrl: item.imageUrl ?? null,
     letterBody: item.letterBody ?? '',
-    letterImages,
-    price: details?.price ?? null,
-    productDetail: details?.detail ?? '',
+    letterImages: item.letterImages ?? [],
+    price: null,
+    productDetail: '',
     status: item.status,
     sentAt: item.sentAt,
     openedAt: item.openedAt,
