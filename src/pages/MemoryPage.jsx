@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import BottomTab from '@/components/layout/BottomTab'
-import { sendGift } from '@/api/gift.jsx'
+import { sendGift, uploadLetterImages } from '@/api/gift.jsx'
 import tracyVisetos from '@/assets/images/tracy-visetos.png'
 
 const DEFAULT_GIFT = {
@@ -34,6 +34,8 @@ function MemoryPage() {
   const [message, setMessage] = useState('')
   const [backgroundColor, setBackgroundColor] = useState('pink')
   const [imageUrl, setImageUrl] = useState('')
+  // 미리보기 URL과 별개로 실제 파일을 들고 있어야 발송 때 업로드할 수 있음
+  const [imageFile, setImageFile] = useState(null)
   const [imageError, setImageError] = useState('')
   const [sendError, setSendError] = useState('')
   const [sending, setSending] = useState(false)
@@ -68,6 +70,7 @@ function MemoryPage() {
     }
 
     setImageError('')
+    setImageFile(file)
     setImageUrl((current) => {
       if (current) URL.revokeObjectURL(current)
       return URL.createObjectURL(file)
@@ -94,11 +97,19 @@ function MemoryPage() {
     setSending(true)
 
     try {
+      // 사진은 먼저 업로드하고 받은 URL만 실을 수 있음. 서버가 외부 URL을 거부함
+      let letterImageUrls = []
+      if (imageFile) {
+        const uploaded = await uploadLetterImages([imageFile])
+        letterImageUrls = uploaded?.urls ?? []
+      }
+
       const result = await sendGift({
         productId: gift.id,
         recommendationId: location.state?.recommendationId,
         letterBody: message.trim(),
         letterColor: backgroundColor,
+        letterImageUrls,
         friendId: location.state?.friendId,
         friendName: recipientName,
       })

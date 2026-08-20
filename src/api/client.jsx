@@ -29,7 +29,10 @@ export async function apiRequest(path, options = {}) {
       credentials: 'include',
       headers: {
         Accept: 'application/json',
-        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        // FormData는 브라우저가 boundary를 붙여야 해서 Content-Type을 직접 넣지 않음
+        ...(options.body && !(options.body instanceof FormData)
+          ? { 'Content-Type': 'application/json' }
+          : {}),
         ...options.headers,
       },
     })

@@ -5,6 +5,7 @@ import {
   getInvitation,
   openInvitation,
   registerInvitationOwned,
+  resolveLetterImageUrl,
 } from '@/api/gift.jsx'
 
 // 편지지 배경색 토큰 4종. 서버는 토큰만 저장하고 실제 색값은 화면이 쥠
@@ -141,6 +142,15 @@ function InvitePage() {
         <p className="break-keep text-[15px] leading-[1.6] whitespace-pre-wrap">
           {invitation.letterBody}
         </p>
+
+        {invitation.letterImageUrls?.map((url) => (
+          <img
+            key={url}
+            src={resolveLetterImageUrl(url)}
+            alt=""
+            className="w-full rounded-[10px] object-cover"
+          />
+        ))}
       </section>
 
       {invitation.product ? (

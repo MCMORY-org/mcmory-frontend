@@ -4,6 +4,7 @@ import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { getMe } from '@/api/auth.jsx'
 import { isUnauthorized } from '@/api/client.jsx'
 import { DUMMY_USER } from '@/api/dummyData.js'
+import { resolveLetterImageUrl } from '@/api/gift.jsx'
 import {
   getLetters,
   getReceivedLetter,
@@ -54,7 +55,7 @@ function MemoryDetailPage() {
         setMemory({
           ...found,
           letterBody: detail?.letterBody ?? '',
-          letterImages: detail?.letterImageUrls ?? [],
+          letterImages: (detail?.letterImageUrls ?? []).map(resolveLetterImageUrl),
           letterColor: detail?.letterColor ?? null,
           price: detail?.product?.price ?? null,
           // 상세를 못 받았으면 동의 여부를 모름. 모르는 것을 "동의 끝남"으로 읽으면 빈 편지를 진짜처럼 염
