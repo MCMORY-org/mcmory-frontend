@@ -25,7 +25,15 @@ function RecommendPage() {
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    navigate('/recommend/questions')
+
+    // 목적과 상황은 계약에 없어 서버로 가지 않음. 관계와 예산만 추천 호출이 씀
+    navigate('/recommend/questions', {
+      state: {
+        relation: relationship || '친구',  // 미선택이면 중립값. 서버는 4종 밖을 REC400_4로 막음
+        minBudget,
+        maxBudget,
+      },
+    })
   }
 
   return (

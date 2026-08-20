@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useLocation, useParams } from 'react-router-dom'
 
 import { DUMMY_USER } from '@/api/dummyData.js'
+import { getSurvey, submitSurvey } from '@/api/surveys.jsx'
 import BottomTab from '@/components/layout/BottomTab'
 
 const COLORS = [
@@ -66,7 +67,21 @@ function getPhoneError(phone) {
 
 function TasteChecklistPage() {
   const location = useLocation()
-  const senderName = location.state?.senderName || DUMMY_USER.name
+  const { token } = useParams()
+
+  const [survey, setSurvey] = useState(null)
+  const [loadError, setLoadError] = useState('')
+  const [submitError, setSubmitError] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const senderName =
+    survey?.senderName || location.state?.senderName || DUMMY_USER.name
+
+  // 발송자가 켠 축만 그림. 여기 없는 축에 답을 담아 보내면 FRIEND400_4임
+  const axes = survey?.axes ?? ['colors', 'styles', 'bags']
+  const askColors = axes.includes('colors')
+  const askStyles = axes.includes('styles')
+  const askBags = axes.includes('bags')
 
   const [step, setStep] = useState('identity')
   const [name, setName] = useState('')
@@ -83,6 +98,24 @@ function TasteChecklistPage() {
     bag: '',
     style: '',
   })
+
+  useEffect(() => {
+    if (!token || token === 'demo') return
+    let alive = true
+
+    getSurvey(token)
+      .then((result) => {
+        if (alive) setSurvey(result)
+      })
+      .catch((cause) => {
+        console.error('[Survey] 조회 실패', cause)
+        if (alive) setLoadError(cause.message ?? '설문 정보를 찾을 수 없습니다')
+      })
+
+    return () => {
+      alive = false
+    }
+  }, [token])
 
   const clearError = (key) => {
     setErrors((current) =>
@@ -135,22 +168,47 @@ function TasteChecklistPage() {
     setStep('questions')
   }
 
-  const handleQuestionsSubmit = (event) => {
+  const handleQuestionsSubmit = async (event) => {
     event.preventDefault()
+    if (saving) return
 
     const nextErrors = {
       name: '',
       phone: '',
       agreed: '',
-      color: selectedColors.length === 0 ? QUESTION_REQUIRED : '',
-      bag: selectedBags.length === 0 ? QUESTION_REQUIRED : '',
-      style: selectedStyles.length === 0 ? QUESTION_REQUIRED : '',
+      color: askColors && selectedColors.length === 0 ? QUESTION_REQUIRED : '',
+      bag: askBags && selectedBags.length === 0 ? QUESTION_REQUIRED : '',
+      style: askStyles && selectedStyles.length === 0 ? QUESTION_REQUIRED : '',
     }
 
     setErrors(nextErrors)
     if (Object.values(nextErrors).some(Boolean)) return
 
-    setStep('done')
+    // 서버가 받는 값은 한국어 라벨임. 화면 id를 그대로 보내면 FRIEND400_4임
+    const toLabels = (items, ids) =>
+      items.filter((item) => ids.includes(item.id)).map((item) => item.label)
+
+    if (!token || token === 'demo') {
+      setStep('done')
+      return
+    }
+
+    setSubmitError('')
+    setSaving(true)
+
+    try {
+      await submitSurvey(token, {
+        colors: askColors ? toLabels(COLORS, selectedColors) : [],
+        styles: askStyles ? selectedStyles : [],
+        bags: askBags ? toLabels(BAGS, selectedBags) : [],
+      })
+      setStep('done')
+    } catch (error) {
+      console.error('[Survey] 제출 실패', error)
+      setSubmitError(error.message ?? '잠시 후 다시 시도해주세요')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const identityErrorCount = [errors.name, errors.phone, errors.agreed].filter(
@@ -159,6 +217,14 @@ function TasteChecklistPage() {
   const questionErrorCount = [errors.color, errors.bag, errors.style].filter(
     Boolean,
   ).length
+
+  if (loadError) {
+    return (
+      <main className="relative mx-auto flex h-dvh w-full max-w-[412px] flex-col items-center justify-center bg-background px-4">
+        <p className="text-center text-body-1 text-primary-dark">{loadError}</p>
+      </main>
+    )
+  }
 
   if (step === 'done') {
     return (
@@ -250,6 +316,7 @@ function TasteChecklistPage() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-[30px]">
+                  {askColors ? (
                   <QuestionCard
                     title="평소 어떤 계열의 색상을 선호하시나요?"
                     error={Boolean(errors.color)}
@@ -298,7 +365,9 @@ function TasteChecklistPage() {
                       )}
                     </div>
                   </QuestionCard>
+                  ) : null}
 
+                  {askBags ? (
                   <QuestionCard
                     title="평소 잘 드는 가방 디자인은 무엇인가요?"
                     error={Boolean(errors.bag)}
@@ -342,7 +411,9 @@ function TasteChecklistPage() {
                       )}
                     </div>
                   </QuestionCard>
+                  ) : null}
 
+                  {askStyles ? (
                   <QuestionCard
                     title="평소 어떤 스타일로 옷을 입으시나요?"
                     error={Boolean(errors.style)}
@@ -380,6 +451,7 @@ function TasteChecklistPage() {
                       )}
                     </div>
                   </QuestionCard>
+                  ) : null}
                 </div>
               )}
             </section>
@@ -424,11 +496,18 @@ function TasteChecklistPage() {
             </>
           ) : null}
 
+          {submitError ? (
+            <p className="mb-2 text-[12px] font-normal text-[#9E2A2B]">
+              {submitError}
+            </p>
+          ) : null}
+
           <button
             type="submit"
-            className="flex w-full items-center justify-center rounded-[10px] bg-primary px-5 py-2.5 text-button text-background"
+            disabled={saving}
+            className="flex w-full items-center justify-center rounded-[10px] bg-primary px-5 py-2.5 text-button text-background disabled:opacity-60"
           >
-            {isIdentity ? 'NEXT' : 'SAVE'}
+            {isIdentity ? 'NEXT' : saving ? '저장 중...' : 'SAVE'}
           </button>
         </div>
       </form>

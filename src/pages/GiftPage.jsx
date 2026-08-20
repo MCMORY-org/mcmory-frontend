@@ -6,7 +6,8 @@ import tracyVisetos from '@/assets/images/tracy-visetos.png'
 import visetosShoulder from '@/assets/images/visetos-shoulder.png'
 import visetosWallet from '@/assets/images/visetos-wallet.png'
 
-const PRODUCTS = [
+// 서버 추천이 없을 때만 쓰는 폴백 목록임(USE_FALLBACK 정책)
+const FALLBACK_PRODUCTS = [
   {
     id: 'tracy-crossbody',
     name: 'Tracy 비세토스 크로스바디',
@@ -33,17 +34,28 @@ const PRODUCTS = [
 function GiftPage() {
   const navigate = useNavigate()
   const location = useLocation()
+
+  const recommended = location.state?.products
+  const products =
+    Array.isArray(recommended) && recommended.length > 0
+      ? recommended
+      : FALLBACK_PRODUCTS
+  const fromServer = products !== FALLBACK_PRODUCTS
+  // `reasonSource`가 LLM일 때만 AI가 골랐다고 표기할 수 있음(API 명세 5.3)
+  const pickedByAi = fromServer && location.state?.reasonSource === 'LLM'
+
   const [selectedId, setSelectedId] = useState(
     () => location.state?.selectedGiftId ?? '',
   )
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    const gift = PRODUCTS.find((product) => product.id === selectedId)
+    const gift = products.find((product) => product.id === selectedId)
     if (!gift) return
 
     navigate('/memory', {
       state: {
+        ...location.state,
         recipientName: location.state?.recipientName,
         gift,
       },
@@ -61,20 +73,22 @@ function GiftPage() {
           <p className="w-[261px] text-[13px] leading-[1.4] font-medium text-primary-active">
             선물을 받는 분의 취향을
             <br />
-            MCMORY AI와 함께 찾아가요
+            MCMORY와 함께 찾아가요
           </p>
 
           <h1 className="mt-[35px] text-h1 text-primary-dark-active">
             MCM LIST
           </h1>
           <p className="mt-2.5 text-[13px] font-medium text-[#947C50]">
-            입력하신 내용을 바탕으로 3가지를 골라봤어요
+            {pickedByAi
+              ? 'AI가 후보 안에서 3가지를 골라봤어요'
+              : '입력하신 내용을 바탕으로 3가지를 골라봤어요'}
           </p>
 
           <div className="min-h-[15px] flex-1" />
 
           <ul className="flex flex-col gap-[15px]">
-            {PRODUCTS.map((product) => {
+            {products.map((product) => {
               const selected = product.id === selectedId
 
               return (

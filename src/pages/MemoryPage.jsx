@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import BottomTab from '@/components/layout/BottomTab'
+import { sendGift } from '@/api/gift.jsx'
 import tracyVisetos from '@/assets/images/tracy-visetos.png'
 
 const DEFAULT_GIFT = {
@@ -34,6 +35,9 @@ function MemoryPage() {
   const [backgroundColor, setBackgroundColor] = useState('pink')
   const [imageUrl, setImageUrl] = useState('')
   const [imageError, setImageError] = useState('')
+  const [sendError, setSendError] = useState('')
+  const [sending, setSending] = useState(false)
+  const [confirming, setConfirming] = useState(false)
 
   useEffect(() => {
     return () => {
@@ -68,11 +72,45 @@ function MemoryPage() {
     })
   }
 
+  // 발송은 되돌릴 수 없어 확인 단계를 앞에 둠
   const handleSubmit = (event) => {
     event.preventDefault()
-    navigate('/memory/sent', {
-      state: { recipientName },
-    })
+
+    const body = message.trim()
+    if (body.length < 1) {
+      setSendError('편지는 1자에서 200자까지 쓸 수 있어요')
+      return
+    }
+
+    setSendError('')
+    setConfirming(true)
+  }
+
+  const handleConfirmSend = async () => {
+    if (sending) return
+
+    setSending(true)
+
+    try {
+      const result = await sendGift({
+        productId: gift.id,
+        recommendationId: location.state?.recommendationId,
+        letterBody: message.trim(),
+        letterColor: backgroundColor,
+        friendId: location.state?.friendId,
+        friendName: recipientName,
+      })
+
+      navigate('/memory/sent', {
+        state: { recipientName, token: result.token, nickname: result.nickname },
+      })
+    } catch (error) {
+      console.error('[Memory] 발송 실패', error)
+      setConfirming(false)
+      setSendError(error.message ?? '잠시 후 다시 시도해주세요')
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -237,6 +275,12 @@ function MemoryPage() {
         </div>
 
         <div className="shrink-0 px-4 pb-3">
+          {sendError ? (
+            <p className="mb-2 text-[12px] font-normal text-[#9E2A2B]">
+              {sendError}
+            </p>
+          ) : null}
+
           <button
             type="submit"
             className="flex w-full items-center justify-center rounded-[10px] bg-primary px-5 py-2.5 text-button text-background"
@@ -245,6 +289,38 @@ function MemoryPage() {
           </button>
         </div>
       </form>
+
+      {confirming ? (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 px-8">
+          <div className="flex w-full flex-col items-center gap-[15px] rounded-[20px] bg-[#FAF9F6] px-5 py-6">
+            <p className="text-center text-[16px] font-semibold text-[#3E281B]">
+              {recipientName}님께 보낼까요?
+            </p>
+            <p className="text-center text-[13px] font-medium text-[#947C50]">
+              보내고 나면 취소할 수 없어요
+            </p>
+
+            <div className="mt-1 flex w-full gap-2.5">
+              <button
+                type="button"
+                onClick={() => setConfirming(false)}
+                disabled={sending}
+                className="flex flex-1 items-center justify-center rounded-[10px] bg-[#EDE6E2] px-5 py-2.5 text-button text-[#8A5A3C] disabled:opacity-60"
+              >
+                다시 보기
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmSend}
+                disabled={sending}
+                className="flex flex-1 items-center justify-center rounded-[10px] bg-primary px-5 py-2.5 text-button text-background disabled:opacity-60"
+              >
+                {sending ? '보내는 중...' : '보내기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <BottomTab activeTab="memory" />
     </main>

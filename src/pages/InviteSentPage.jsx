@@ -1,10 +1,21 @@
+import { useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
 import BottomTab from '@/components/layout/BottomTab'
+import { buildInviteUrl } from '@/api/gift.jsx'
 
 function InviteSentPage() {
   const location = useLocation()
   const recipientName = location.state?.recipientName || '김민지'
+  const token = location.state?.token
+  const inviteUrl = token ? buildInviteUrl(token) : ''
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    if (!inviteUrl) return
+    await navigator.clipboard.writeText(inviteUrl)
+    setCopied(true)
+  }
 
   return (
     <main className="relative mx-auto flex h-dvh w-full max-w-[412px] flex-col overflow-hidden bg-background">
@@ -24,6 +35,21 @@ function InviteSentPage() {
             초대장 링크가 전송됐어요!
           </p>
         </div>
+
+        {inviteUrl ? (
+          <div className="mt-[25px] flex w-full max-w-[320px] flex-col items-center gap-2.5 px-4">
+            <p className="w-full truncate rounded-[10px] bg-[#FAF9F6] px-3 py-2.5 text-center text-[12px] font-medium text-[#947C50]">
+              {inviteUrl}
+            </p>
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="flex w-full items-center justify-center rounded-[10px] bg-primary px-5 py-2.5 text-button text-background"
+            >
+              {copied ? '복사했어요' : '초대 링크 복사'}
+            </button>
+          </div>
+        ) : null}
       </div>
 
       <BottomTab activeTab="memory" />
