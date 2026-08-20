@@ -179,7 +179,7 @@ function MemoryDetailPage() {
               >
                 <p className="text-[13px] font-medium text-[#3E281B]">
                   {memory.needConsent
-                    ? '초대 링크에서 동의하면 편지를 볼 수 있어요'
+                    ? '문자로 받은 초대 링크에서 동의하면 편지를 볼 수 있어요'
                     : '편지도 함께 왔어요!'}
                 </p>
                 {memory.needConsent ? null : (

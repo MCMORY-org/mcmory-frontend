@@ -25,6 +25,14 @@ export function openLetter(id) {
 }
 
 /**
+ * 보낸 선물 목록임. **폴백을 쓰지 않음** — 401을 더미로 덮으면 로그인이 필요한 상태가
+ * "보낸 선물이 없음"으로 보여 거짓이 됨.
+ */
+export function getSentLetters() {
+  return apiRequest('/api/v1/letters')
+}
+
+/**
  * 받은 편지 상세임(API 명세서 5.4의 #37). 목록에는 본문도 초대 토큰도 없어 여기서만 가져올 수 있음.
  * 동의 전에는 `needConsent: true`와 닉네임만 오고 `letterBody` 키 자체가 없음.
  */
