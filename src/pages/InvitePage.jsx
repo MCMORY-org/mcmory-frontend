@@ -8,7 +8,7 @@ import {
   resolveLetterImageUrl,
 } from '@/api/gift.jsx'
 
-// 편지지 배경색 토큰 4종. 서버는 토큰만 저장하고 실제 색값은 화면이 쥠
+// 서버는 실제 색상값 대신 아래 토큰을 저장함
 const LETTER_COLORS = {
   GOLD: '#C5A56A',
   BLACK: '#1B1B1B',
@@ -62,7 +62,6 @@ function InvitePage() {
     }
   }
 
-  // 이 경로만 로그인이 필요함
   const handleRegisterOwned = async () => {
     if (working) return
     setWorking(true)

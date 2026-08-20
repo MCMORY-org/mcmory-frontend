@@ -34,7 +34,6 @@ function MemoryPage() {
   const [message, setMessage] = useState('')
   const [backgroundColor, setBackgroundColor] = useState('pink')
   const [imageUrl, setImageUrl] = useState('')
-  // 미리보기 URL과 별개로 실제 파일을 들고 있어야 발송 때 업로드할 수 있음
   const [imageFile, setImageFile] = useState(null)
   const [imageError, setImageError] = useState('')
   const [sendError, setSendError] = useState('')
@@ -48,7 +47,7 @@ function MemoryPage() {
   }, [imageUrl])
 
   const handleChangeGift = () => {
-    // 추천 결과와 friendId를 함께 되돌려줌 — 잃으면 더미 상품으로 떨어져 발송이 GIFT400_1로 죽음
+    // 추천과 친구 식별자를 보존해야 실제 상품으로 발송됨. 이전 화면 상태를 함께 넘김
     navigate('/gift', {
       state: {
         ...location.state,

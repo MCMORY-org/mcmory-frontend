@@ -26,10 +26,10 @@ function RecommendPage() {
   const handleSubmit = (event) => {
     event.preventDefault()
 
-    // 목적과 상황은 계약에 없어 서버로 가지 않음. 관계와 예산만 추천 호출이 씀
+    // 추천 API는 관계와 예산만 받음. 목적과 상황은 넘기지 않음
     navigate('/recommend/questions', {
       state: {
-        relation: relationship || '친구',  // 미선택이면 중립값. 서버는 4종 밖을 REC400_4로 막음
+        relation: relationship || '친구',  // 미선택 시 서버가 허용하는 중립값 '친구'를 씀
         minBudget,
         maxBudget,
       },

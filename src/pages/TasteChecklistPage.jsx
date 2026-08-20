@@ -77,7 +77,7 @@ function TasteChecklistPage() {
   const senderName =
     survey?.senderName || location.state?.senderName || DUMMY_USER.name
 
-  // 발송자가 켠 축만 그림. 여기 없는 축에 답을 담아 보내면 FRIEND400_4임
+  // 서버가 내려준 축만 그리고 제출함. 다른 축을 보내면 FRIEND400_4임
   const axes = survey?.axes ?? ['colors', 'styles', 'bags']
   const askColors = axes.includes('colors')
   const askStyles = axes.includes('styles')

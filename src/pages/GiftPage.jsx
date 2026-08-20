@@ -8,7 +8,6 @@ import tracyVisetos from '@/assets/images/tracy-visetos.png'
 import visetosShoulder from '@/assets/images/visetos-shoulder.png'
 import visetosWallet from '@/assets/images/visetos-wallet.png'
 
-// 서버 추천이 없을 때만 쓰는 폴백 목록임(USE_FALLBACK 정책)
 const FALLBACK_PRODUCTS = [
   {
     id: 'tracy-crossbody',
@@ -43,7 +42,6 @@ function GiftPage() {
       ? recommended
       : FALLBACK_PRODUCTS
   const fromServer = products !== FALLBACK_PRODUCTS
-  // `reasonSource`가 LLM일 때만 AI가 골랐다고 표기할 수 있음(API 명세 5.3)
   const pickedByAi = fromServer && location.state?.reasonSource === 'LLM'
 
   const [selectedId, setSelectedId] = useState(
@@ -51,7 +49,6 @@ function GiftPage() {
   )
   const [copied, setCopied] = useState(false)
 
-  // 발송자가 받은 설문 링크임. 이걸 안 보여주면 수신자에게 보낼 방법이 없음
   const surveyUrl = location.state?.surveyPath
     ? buildSurveyUrl(location.state.surveyPath)
     : ''

@@ -1,9 +1,9 @@
 import { apiRequest } from '@/api/client.jsx'
 
 /**
- * 추천 생성. `friendId`를 주면 그 친구가 설문에 답한 취향이 점수에 반영됨.
- * `aiReason`은 옵트인이고, 모델이 실패하면 서버가 규칙 결과로 폴백하며 그때도 200임.
- * 응답 `reasonSource`가 `LLM`일 때만 화면이 AI가 골랐다고 표기할 수 있음.
+ * `friendId`가 있으면 그 친구의 설문 취향을 점수에 반영함.
+ * `aiReason` 요청에서 모델이 실패해도 규칙 결과와 200을 반환하며,
+ * `reasonSource`가 `LLM`인 응답만 AI 추천으로 표기할 수 있음.
  */
 export function createRecommendation({
   relation,
@@ -21,7 +21,6 @@ export function createRecommendation({
   })
 }
 
-/** 추천 결과를 화면이 쓰는 상품 모양으로 변환함. */
 export function mapRecommendedProduct(item) {
   return {
     id: item.product?.id,

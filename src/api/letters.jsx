@@ -24,17 +24,14 @@ export function openLetter(id) {
   )
 }
 
-/**
- * 보낸 선물 목록임. **폴백을 쓰지 않음** — 401을 더미로 덮으면 로그인이 필요한 상태가
- * "보낸 선물이 없음"으로 보여 거짓이 됨.
- */
+/** 인증 실패를 빈 목록으로 오인하지 않도록 이 요청에는 더미 폴백을 쓰지 않음. */
 export function getSentLetters() {
   return apiRequest('/api/v1/letters')
 }
 
 /**
- * 받은 편지 상세임(API 명세서 5.4의 #37). 목록에는 본문도 초대 토큰도 없어 여기서만 가져올 수 있음.
- * 동의 전에는 `needConsent: true`와 닉네임만 오고 `letterBody` 키 자체가 없음.
+ * 목록 응답에는 편지 본문과 초대 토큰이 없어 상세 요청으로 가져옴.
+ * 동의 전 응답에는 `needConsent: true`와 닉네임만 있고 `letterBody` 키가 없음.
  */
 export function getReceivedLetter(id) {
   return apiRequest(`/api/v1/letters/${id}`)
@@ -44,7 +41,7 @@ export function mapReceivedMemory(item) {
   const locallyOpened = openedLetterIds.has(String(item.id))
   const unread =
     !locallyOpened && (item.status === 'SENT' || item.openedAt == null)
-  // 본문·사진·가격은 목록에 없음. 상세(#37)에서 채움 — 더미로 메우면 남의 사진과 틀린 가격이 나감
+  // 목록 응답에 없는 본문·사진·가격은 상세 조회로 채움. 더미로 채우면 다른 편지의 정보가 보임
 
   return {
     id: String(item.id),

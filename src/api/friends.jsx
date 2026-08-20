@@ -62,8 +62,7 @@ export function getFriendInitial(name) {
 }
 
 /**
- * `HOME-02` 질문 선별 저장과 `Start-02` 설문 링크 발급. 한 번의 호출임.
- * 토큰은 멱등이라 축을 고쳐 다시 저장해도 이미 보낸 링크는 살아 있음.
+ * 같은 친구에게 다시 요청해도 기존 설문 토큰은 유지됨.
  * `colors`와 `styles`를 둘 다 끄면 `FRIEND400_4`임.
  */
 export function issueSurvey(friendId, axes) {
@@ -73,10 +72,6 @@ export function issueSurvey(friendId, axes) {
   })
 }
 
-/**
- * 친구를 등록하되 이미 있으면 그 친구를 돌려줌.
- * 전화번호 중복은 `FRIEND409_1`이고, 그때 목록에서 같은 번호를 찾음.
- */
 export async function ensureFriend({ name, phone }) {
   const digits = String(phone).replace(/\D/g, '')
 

@@ -6,10 +6,6 @@ import { buildInviteUrl } from '@/api/gift.jsx'
 import { getSentLetters } from '@/api/letters.jsx'
 import BottomTab from '@/components/layout/BottomTab'
 
-/**
- * 보낸 선물 목록임. 초대 링크를 다시 꺼내는 유일한 자리라 발송 직후 복사를 놓쳐도 되찾을 수 있음.
- * 토큰은 발송자 본인에게만 보임 — 받은 편지 목록에는 서버가 토큰을 싣지 않음.
- */
 function SentLettersPage() {
   const navigate = useNavigate()
   const [items, setItems] = useState(null)

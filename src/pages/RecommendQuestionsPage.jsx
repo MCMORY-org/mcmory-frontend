@@ -146,7 +146,7 @@ function RecommendQuestionsPage() {
 
     if (Object.values(nextErrors).some(Boolean)) return
 
-    // 켠 축만 수신자에게 물어봄. 발송자가 고른 값은 점수에 들어가지 않음(API 명세 5.5)
+    // 선택값은 질문 활성화에만 쓰고 추천 점수에 반영하지 않음. 서버에는 켠 축만 보냄
     const axes = [
       colorEnabled ? 'colors' : null,
       styleEnabled ? 'styles' : null,

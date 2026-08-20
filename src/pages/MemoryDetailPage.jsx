@@ -38,7 +38,7 @@ function MemoryDetailPage() {
           getLetters(),
           listOwned().catch(() => ({ list: [] })),
           getMe().catch(() => null),
-          // 본문·사진·가격은 목록에 없고 상세(#37)에만 있음. 동의 전이면 본문 키가 없음
+          // 목록 응답에는 본문·사진·가격이 없어 상세 요청으로 가져옴. 동의 전에는 letterBody 키가 없음
           getReceivedLetter(memoryId).catch(() => null),
         ])
         if (cancelled) return
